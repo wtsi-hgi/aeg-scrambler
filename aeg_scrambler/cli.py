@@ -1,4 +1,4 @@
-"""Copyright (c) Crawford Mace.
+"""Copyright (c) Ronnie Crawford.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -10,8 +10,8 @@ app = typer.Typer()
 
 
 @app.command()
-def hello(name: str) -> None:
-    """Say hello to someone.
+def rank() -> None:
+    """Prioritises genes based on weights of various factors
 
     Args:
         name: Name to display in the greeting.
@@ -19,12 +19,13 @@ def hello(name: str) -> None:
     Returns:
         None
     """
-    typer.echo(f"Hello {name}")
 
 
 @app.command()
-def goodbye(name: str, formal: bool = False) -> None:
-    """Say goodbye.
+def design() -> None:
+    """Taking a list of ranked genes, will design pegRNA sequences for the 
+    regions between enhancers and call PRIDICT to find the most efficient
+    in each inter-enhancer sequence
 
     Args:
         name: Name to display in the greeting.
@@ -33,10 +34,30 @@ def goodbye(name: str, formal: bool = False) -> None:
     Returns:
         None
     """
-    if formal:
-        typer.echo(f"Goodbye {name}. Have a good day.")
-    else:
-        typer.echo(f"Bye {name}!")
+        
+@app.command()
+def explore() -> None:
+    """Taking a list of genes will display their distribution and 
+    generate several sets of graphs for several features
+
+    Args:
+        name: Name to display in the greeting.
+
+    Returns:
+        None
+    """
+
+@app.command()
+def exportX() -> None:
+    """Export either a wig or bed file of plateau regions,
+    convolution signal etc as decided by options
+
+    Args:
+        name: Name to display in the greeting.
+
+    Returns:
+        None
+    """
 
 
 def main() -> None:

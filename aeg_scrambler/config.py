@@ -73,6 +73,8 @@ class Config:
         self.inserted_sequence = "ATAACTTCGTATAATGTACATTATACGAAGTTAT"
         self.partial_insertion_per_region = 100
         
+        self = self.set_config_from_file(self)
+        
     def set_config_from_file(self):
             
         # Reads user generated config file

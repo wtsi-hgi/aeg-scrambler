@@ -1,8 +1,14 @@
 import pandas as pd
+import re
 
 class GeneAnnotations:
     
-    def __init__(self, file_path):
+    def __init__(self, config):
+        
+        self.read_gene_annotations(self, config.gene_annotation_reference)
+        self.clean_gene_annotations(self)
+            
+    def read_gene_annotations(self, file_path):
         
         #Reads gene annotations gtf file into pandas dataframe
         
@@ -36,10 +42,12 @@ class GeneAnnotations:
             
             print("ERROR: Gene annotations file could not be read.")
             
-    def clean_gene_annotations(self, chromosomes_of_interest):
+    def clean_gene_annotations(self, config):
+        
+        # Puts annotation data into correct format and removes unecessary data
         
         self.data = self.data.loc[self.data["Chromosome"]
-                                  .isin(chromosomes_of_interest)]
+                                  .isin(config.chromosomes_of_interest)]
         self.data = self.data \
             .drop(self.data[self.data["Type"] != "gene"].index)
         self.data["Gene_biotype"] = self.data["Attributes"]\
