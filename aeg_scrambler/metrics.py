@@ -19,10 +19,14 @@ class Metrics:
             ]
         self.regulatory_data = regulatory_element_annotations
         self.merge_genetic_data(self, gene_annotations, gene_expression)
-        self.find_gene_sizes(self.data)
-        self.find_interferring_genes(self.data, config)
-        self.find_search_windows(self.data, config)
-        self.find_element_overlaps_within_search_window(self.data, self.regulatory_data)
+        self.find_gene_sizes(self)
+        self.find_interferring_genes(self, config)
+        self.find_search_windows(self, config)
+        self.find_element_overlaps_within_search_window(self)
+        self.count_overlaps_per_gene(self, element_type)
+        self.find_nearby_enhancer_densities(self)
+        self.find_symmetry_of_elements(self)
+        self.calculate_interest_score(self, config)
         
     def merge_genetic_data(self, gene_annotations, gene_expression):
         
