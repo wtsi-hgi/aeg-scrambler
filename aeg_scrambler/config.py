@@ -73,7 +73,10 @@ class Config:
         self.inserted_sequence = "ATAACTTCGTATAATGTACATTATACGAAGTTAT"
         self.partial_insertion_per_region = 100
         
-    def set_config_from_file():
+    def set_config_from_file(self):
+            
+        # Reads user generated config file
+        # and changes variables as necessary    
             
         try:
         
@@ -81,128 +84,131 @@ class Config:
                 
                 settings = json.load(config_file)
                 
-                results_directory = \
+                self.results_directory = \
                     settings["results_directory"]
-                gene_prioritisation_report_directory = \
+                self.gene_prioritisation_report_directory = \
                     settings["gene_prioritisation_report_directory"]
-                gene_annotation_reference = \
+                self.gene_annotation_reference = \
                     settings["gene_annotation_reference"]
-                regulatory_elements_reference = \
+                self.regulatory_elements_reference = \
                     settings["regulatory_elements_reference"]
-                general_expression_by_cell_line_reference_path = \
+                self.general_expression_by_cell_line_reference_path = \
                     settings["general_expression_by_cell_line_reference_path"]
-                specific_expression_by_cell_line_reference_path = \
+                self.specific_expression_by_cell_line_reference_path = \
                     settings["specific_expression_by_cell_line_reference_path"]
-                reference_genome = \
+                self.reference_genome = \
                     settings["reference_genome"]
 
-                cell_line_of_interest = \
+                self.cell_line_of_interest = \
                     settings["cell_line_of_interest"]
-                chromosomes_of_interest = \
+                self.chromosomes_of_interest = \
                     settings["chromosomes_of_interest"]
-                enhancer_epigenetic_flags_of_interest = \
+                self.enhancer_epigenetic_flags_of_interest = \
                     settings["enhancer_epigenetic_flags_of_interest"]
-                quiescent_epigenetic_flags_of_interest = \
+                self.quiescent_epigenetic_flags_of_interest = \
                     settings["quiescent_epigenetic_flags_of_interest"]
 
-                search_type = \
+                self.search_type = \
                     settings["search_type"]
-                upstream_search = \
+                self.upstream_search = \
                     settings["upstream_search"]
-                downstream_search = \
+                self.downstream_search = \
                     settings["downstream_search"]
 
-                std_hard_filter_max = \
+                self.std_hard_filter_max = \
                     settings["std_hard_filter_max"]
-                std_hard_filter_min = \
+                self.std_hard_filter_min = \
                     settings["std_hard_filter_min"]
-                anomalous_expression_hard_filter_max = \
+                self.anomalous_expression_hard_filter_max = \
                     settings["anomalous_expression_hard_filter_max"]
-                anomalous_expression_hard_filter_min = \
+                self.anomalous_expression_hard_filter_min = \
                     settings["anomalous_expression_hard_filter_min"]
-                enhancer_count_hard_filter_max = \
+                self.enhancer_count_hard_filter_max = \
                     settings["enhancer_count_hard_filter_max"]
-                enhancer_count_hard_filter_min = \
+                self.enhancer_count_hard_filter_min = \
                     settings["enhancer_count_hard_filter_min"]
-                enhancer_proportion_hard_filter_max = \
+                self.enhancer_proportion_hard_filter_max = \
                     settings["enhancer_proportion_hard_filter_max"]
-                enhancer_proportion_hard_filter_min = \
+                self.enhancer_proportion_hard_filter_min = \
                     settings["enhancer_proportion_hard_filter_min"]
-                cell_line_expression_hard_filter_max = \
+                self.cell_line_expression_hard_filter_max = \
                     settings["cell_line_expression_hard_filter_max"]
-                cell_line_expression_hard_filter_min = \
+                self.cell_line_expression_hard_filter_min = \
                     settings["cell_line_expression_hard_filter_min"]
-                gene_size_hard_filter_max = \
+                self.gene_size_hard_filter_max = \
                     settings["gene_size_hard_filter_max"]
-                gene_size_hard_filter_min = \
+                self.gene_size_hard_filter_min = \
                     settings["gene_size_hard_filter_min"]
-                symmetry_hard_filter_max = \
+                self.symmetry_hard_filter_max = \
                     settings["symmetry_hard_filter_max"]
-                symmetry_hard_filter_min = \
+                self.symmetry_hard_filter_min = \
                     settings["symmetry_hard_filter_min"]
 
-                relative_std_weight = \
+                self.relative_std_weight = \
                     settings["relative_std_weight"]
-                relative_anomalous_expression_weight = \
+                self.relative_anomalous_expression_weight = \
                     settings["relative_anomalous_expression_weight"]
-                relative_enhancer_count_weight = \
+                self.relative_enhancer_count_weight = \
                     settings["relative_enhancer_count_weight"]
-                relative_enhancer_proportion_weight = \
+                self.relative_enhancer_proportion_weight = \
                     settings["relative_enhancer_proportion_weight"]
-                relative_cell_line_expression_weight = \
+                self.relative_cell_line_expression_weight = \
                     settings["relative_cell_line_expression_weight"]
-                relative_gene_size_weight= \
+                self.relative_gene_size_weight= \
                     settings["relative_gene_size_weight"]
-                relative_symmetry_weight = \
+                self.relative_symmetry_weight = \
                     settings["relative_symmetry_weight"]
 
-                enhancer_kernel_shape = \
+                self.enhancer_kernel_shape = \
                     settings["enhancer_kernel_shape"]
-                enhancer_kernel_size_type = \
+                self.enhancer_kernel_size_type = \
                     settings["enhancer_kernel_size_type"]
-                absolute_enhancer_kernel_size = \
+                self.absolute_enhancer_kernel_size = \
                     settings["absolute_enhancer_kernel_size"]
-                absolute_enhancer_kernel_sigma = \
+                self.absolute_enhancer_kernel_sigma = \
                     settings["absolute_enhancer_kernel_sigma"]
-                relative_enhancer_kernel_size = \
+                self.relative_enhancer_kernel_size = \
                     settings["relative_enhancer_kernel_size"]
-                relative_enhancer_kernel_sigma = \
+                self.relative_enhancer_kernel_sigma = \
                     settings["relative_enhancer_kernel_sigma"]
 
-                quiescent_kernel_shap = \
+                self.quiescent_kernel_shap = \
                     settings["quiescent_kernel_shape"]
-                quiescent_kernel_size_type = \
+                self.quiescent_kernel_size_type = \
                     settings["quiescent_kernel_size_type"]
-                absolute_quiescent_kernel_size = \
+                self.absolute_quiescent_kernel_size = \
                     settings["absolute_quiescent_kernel_size"]
-                relative_quiescent_kernel_size = \
+                self.relative_quiescent_kernel_size = \
                     settings["relative_quiescent_kernel_size"]
-                relative_quiescent_kernel_sigma = \
+                self.relative_quiescent_kernel_sigma = \
                     settings["relative_quiescent_kernel_sigma"]
 
-                cell_line_specific_expression_threshold = \
+                self.cell_line_specific_expression_threshold = \
                     settings["cell_line_specific_expression_threshold"]
-                interferring_gene_overlaps = \
+                self.interferring_gene_overlaps = \
                     settings["interferring_gene_overlaps"]
 
-                convolution_limit = \
+                self.convolution_limit = \
                     settings["convolution_limit"]
-                enhancer_convolution_weight = \
+                self.enhancer_convolution_weight = \
                     settings["enhancer_convolution_weight"]
-                quiescent_convolution_weight = \
+                self.quiescent_convolution_weight = \
                     settings["quiescent_convolution_weight"]
-                plateau_threshold = \
+                self.plateau_threshold = \
                     settings["plateau_threshold"]
                 
-                inserted_sequence = \
+                self.inserted_sequence = \
                     settings["inserted_sequence"]
-                partial_insertion_per_region = \
+                self.partial_insertion_per_region = \
                     settings["partial_insertion_per_region"]
                     
         except:
             
             print("ERROR: Config file could not be read.")
             
-    def print_config():
+    def print_config(self):
         
+        # Prints the current config that the program will use
         
+        current_config = vars(self)
+        print(', '.join("%s: %s" % setting for setting in current_config.items()))
