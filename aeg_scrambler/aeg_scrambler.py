@@ -13,6 +13,15 @@ class Datatype(Enum):
     SPECIFIC = 'specific'
     ANNOTATION = 'annotation'
 
+    def is_general(self):
+        return self == Datatype.GENERAL
+    
+    def is_specific(self):
+        return self == Datatype.SPECIFIC
+    
+    def is_annotation(self):
+        return self == Datatype.ANNOTATION
+    
 class GeneData:
 
     def __init__(self, name, reference, datatype=Datatype.GENERAL) -> None:
@@ -26,23 +35,29 @@ class GeneData:
         self.data = self.read_data()
 
     def read_data(self) -> pd.DataFrame:
-        if self.datatype == Datatype.ANNOTATION:
-            names = ["Chromosome", "Source", "Type","Start", "End", "Score", 
-                    "Strand", "Phase", "Attributes"]
+        """Load data at path reference into a pandas dataframe."""
+        names, skiprows = None, None
+        sep = ',' if self.datatype.is_general() else '\t'
+
+        if self.datatype.is_annotation():
+            names = ['Chromosome','Source','Type','Start','End','Score', 
+                    'Strand','Phase','Attributes']
             skiprows = 5
         
-        elif self.datatype == Datatype.SPECIFIC:
-            names = ['Gene_name', 'Specific_gene_expression']
+        elif self.datatype.is_specific():
+            names = ['Gene_name','Specific_gene_expression']
             skiprows = 1
         
         dtype = {name: str for name in names} if names else None
-
+        
         data = pd.read_csv(
             self.reference,
-            sep='\t',
+            sep=sep,
             names=names, 
             skiprows=skiprows, 
-            dtype=dtype)
+            dtype=dtype
+            )
+        data = data.transpose() if self.datatype.is_general() else data
         
         return data.head()
 
@@ -59,5 +74,5 @@ specificPath = "specifc/path/here"
 generalPath = "general/path/here"
 annotationPath = "annotation/path/here"
 
-hap1Cells = GeneData('hap1', annotationPath, Datatype('annotation'))
+hap1Cells = GeneData('hap1', generalPath, Datatype('general'))
 print(hap1Cells.data)
