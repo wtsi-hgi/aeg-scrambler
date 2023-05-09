@@ -26,6 +26,7 @@ packages = [
 python = ">=3.9,<4.0"
 pip = "^23.1.2"
 typer = "^0.7.0"
+pandas = "^2.0.1"
 
 [tool.poetry.group.dev]
 optional = true

@@ -8,6 +8,15 @@ import typer
 
 app = typer.Typer()
 
+@app.command()
+def hello(name: str) -> None:
+    """Say hello to someone.
+    Args:
+        name: Name to display in the greeting.
+    Returns:
+        None
+    """
+    typer.echo(f"Hello {name}")
 
 @app.command()
 def rank() -> None:
