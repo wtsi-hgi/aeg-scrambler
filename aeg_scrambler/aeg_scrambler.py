@@ -53,10 +53,6 @@ class GeneData:
             dtype = {'Gene_name': str, 'Specific_gene_expression': float}
             skiprows = 1
         
-        
-        dtype = {name: str for name in names} if names else None
-        
-                
         dtype = {name: str for name in names} if names else None
         
         data = pd.read_csv(
