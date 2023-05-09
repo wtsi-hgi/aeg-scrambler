@@ -5,6 +5,7 @@ LICENSE file in the root directory of this source tree.
 """
 
 import pandas as pd
+import numpy as np
 from pathlib import Path
 from enum import Enum
 
@@ -23,6 +24,7 @@ class Datatype(Enum):
         return self == Datatype.ANNOTATION
     
 class GeneData:
+    interesting_chromosomes = [str(i) for i in range(1, 23)] + ['X', 'Y']
 
     def __init__(self, name, reference, datatype=Datatype.GENERAL) -> None:
         """Constructor."""
@@ -36,18 +38,25 @@ class GeneData:
 
     def read_data(self) -> pd.DataFrame:
         """Load data at path reference into a pandas dataframe."""
-        names, skiprows = None, None
+
+        names = skiprows = dtype = None
         sep = ',' if self.datatype.is_general() else '\t'
 
         if self.datatype.is_annotation():
-            names = ['Chromosome','Source','Type','Start','End','Score', 
-                    'Strand','Phase','Attributes']
+            names = ['Chromosome', 'Source', 'Type', 'Start', 'End', 'Score',
+                    'Strand', 'Phase', 'Attributes']
+            dtype = {name: str for name in names}
             skiprows = 5
         
         elif self.datatype.is_specific():
-            names = ['Gene_name','Specific_gene_expression']
+            names = ['Gene_name', 'Specific_gene_expression']
+            dtype = {'Gene_name': str, 'Specific_gene_expression': float}
             skiprows = 1
         
+        
+        dtype = {name: str for name in names} if names else None
+        
+                
         dtype = {name: str for name in names} if names else None
         
         data = pd.read_csv(
@@ -58,11 +67,42 @@ class GeneData:
             dtype=dtype
             )
         data = data.transpose() if self.datatype.is_general() else data
+
+        return data
+    
+    def clean_data(self, data) -> pd.DataFrame:
+        if self.datatype.is_specific():
+            return self.clean_specific_data(data)
         
-        return data.head()
+        elif self.datatype.is_general():
+            return self.clean_general_data(data)
+        
+        elif self.datatype.is_annotation():
+            return self.clean_annotation_data(data)
+        
+        raise Exception('Trying to clean invalid datatype')
+    
+    def clean_specific_data(self, data) -> pd.DataFrame:
+        """Convert -inf to 0; convert log2 to normal base."""
+
+        data = data.drop_duplicates(keep=False, subset='Gene_name')
+
+        data['Specific_gene_expression'] = np.where(
+            data['Specific_gene_expression'] == '-Inf',
+            0,
+            2 ** data['Specific_gene_expression']
+        )
+
+        return data
+    
+    def clean_general_data(self, data) -> pd.DataFrame:
+        pass
+    
+    def clean_annotation_data(self, data) -> pd.DataFrame:
+        pass
 
     def __str__(self) -> str:
-        return f"Genedata called {self.name}!"
+        return f"""Genedata called {self.name}, head \n{self.data.head()}!"""
     
     def __repr__(self) -> str:
         return {self.name, self.datatype, self.reference}
@@ -74,5 +114,5 @@ specificPath = "specifc/path/here"
 generalPath = "general/path/here"
 annotationPath = "annotation/path/here"
 
-hap1Cells = GeneData('hap1', generalPath, Datatype('general'))
-print(hap1Cells.data)
+hap1Cells = GeneData('hap1', annotationPath, Datatype('annotation'))
+print(hap1Cells)
