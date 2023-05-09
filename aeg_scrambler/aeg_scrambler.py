@@ -13,15 +13,6 @@ class Datatype(Enum):
     SPECIFIC = 'specific'
     ANNOTATION = 'annotation'
 
-    def is_general(self):
-        return self == Datatype.GENERAL
-    
-    def is_specific(self):
-        return self == Datatype.SPECIFIC
-    
-    def is_annotation(self):
-        return self == Datatype.ANNOTATION
-
 class GeneData:
 
     def __init__(self, name, reference, datatype=Datatype.GENERAL) -> None:
@@ -35,12 +26,12 @@ class GeneData:
         self.data = self.read_data()
 
     def read_data(self) -> pd.DataFrame:
-        if self.datatype.is_annotation():
+        if self.datatype == Datatype.ANNOTATION:
             names = ["Chromosome", "Source", "Type","Start", "End", "Score", 
                     "Strand", "Phase", "Attributes"]
             skiprows = 5
         
-        elif self.datatype.is_specific():
+        elif self.datatype == Datatype.SPECIFIC:
             names = ['Gene_name', 'Specific_gene_expression']
             skiprows = 1
         
