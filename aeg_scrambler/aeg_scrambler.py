@@ -11,24 +11,35 @@ from pathlib import Path
 from abc import abstractmethod, ABC
 
 class GeneData(ABC):
-    def __init__(self, filename: Path) -> None:
-        self.filename = filename
+    skiprows = 0
+    columns = None
+    separator = ","
     
-    def load(self) -> pd.DataFrame:
-        data = pd.read_csv(self.filename)
-        return self.clean(data)
+    def __init__(self, filename: Path) -> None:
+        print(f"{self.__class__.__name__}")
+        self.filename = filename
+        self.data = self.clean(self.load())
 
+    def load(self) -> pd.DataFrame:
+        print(f"  loading data: sep={self.separator} columns={self.columns}, skiprows={self.skiprows}") 
+        return pd.read_csv(self.filename, names=self.columns, skiprows=self.skiprows, sep=self.separator)
+    
     @abstractmethod
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
         """Every derived class must implement this"""
         pass
 
 class GeneralData(GeneData):
+    separator = "\t"
+
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
         print("cleaning GeneralData")
     
 
 class SpecificData(GeneData):
+    skiprows = 1
+    columns = ['Gene_name', 'Specific_gene_expression']
+
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
         """Convert -inf to 0; convert log2 to normal base."""
 
@@ -42,6 +53,19 @@ class SpecificData(GeneData):
 
         
 class AnnotationData(GeneData):
+    skip_rows = 5
+    columns = [
+        'Chromosome', 
+        'Source', 
+        'Type', 
+        'Start', 
+        'End', 
+        'Score',
+        'Strand', 
+        'Phase', 
+        'Attributes'
+    ]
+
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
         print("cleaning AnnotationData")
 
@@ -65,6 +89,15 @@ class GeneDataLoader:
     
 data_loader = GeneDataLoader()
 
-a = data_loader.load("a.csv", GeneDataLoader.Type.general)
-b = data_loader.load("b.csv", GeneDataLoader.Type.specific)
-c = data_loader.load("c.csv", GeneDataLoader.Type.annotation)    
+#a = data_loader.load("a.csv", GeneDataLoader.Type.general)
+#b = data_loader.load("b.csv", GeneDataLoader.Type.specific)
+#c = data_loader.load("c.csv", GeneDataLoader.Type.annotation)    
+
+specificPath = "specific/path/here"
+generalPath = "general/path/here"
+annotationPath = "annotation/path/here"
+
+a = GeneralData(generalPath)
+b = SpecificData(specificPath)
+c = AnnotationData(annotationPath)
+print(a)
