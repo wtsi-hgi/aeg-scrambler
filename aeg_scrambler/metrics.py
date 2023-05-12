@@ -300,7 +300,7 @@ class Metrics:
         )
         self.data = self.iterate_through_hard_filters()
         self.data = self.data.sort_values(
-            "Interest_score", ascenconfigng = False).reset_index()
+            "Interest_score", ascending = False).reset_index()
         
         for feature in self.interesting_features:
             self.data["Z-" + feature] = stats.zscore(self.data[feature])

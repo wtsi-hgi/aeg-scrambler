@@ -150,3 +150,16 @@ class Sequences:
                 config.pridict_output_path
             ]
             )
+        
+    def read_pridict_output(self, configuration):
+        
+        self.output = pd.read_csv(configuration.pridict_output_path)
+        
+    def clean_pridict_output(self):
+        
+        self.output = self.output.drop([["Original_sequences",
+                                         "Edited_sequences"]],
+                                       axis = 1)
+        self.output = self.output[self.output["Editing_Position"] >= 10]
+        self.output = self.output.sort_values(
+            "PRIDICT_editing_Score_deep", ascending = False).reset_index()
