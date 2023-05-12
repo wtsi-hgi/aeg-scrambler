@@ -3,6 +3,7 @@ import pandas as pd
 import pyranges as pr
 from scipy import stats
 from sklearn.preprocessing import StandardScaler
+import hashlib
 
 class Metrics:
     
@@ -27,6 +28,13 @@ class Metrics:
         self.find_nearby_enhancer_densities(self)
         self.find_symmetry_of_elements(self)
         self.calculate_interest_score(self, config)
+        self.interesting_features = ["Std",
+                                     "Anomalous_score",
+                                     "Enhancer_count",
+                                     "Enhancer_proportion",
+                                     "Specific_gene_expression",
+                                     "Gene_size",
+                                     "Symmetry_ratio"]
         
     def merge_genetic_data(self, gene_annotations, gene_expression):
         
@@ -353,6 +361,59 @@ class Metrics:
         
         else: 
             print("ERROR : Could not identify minmax.")
+
+    def export_gene_scores_report(self, configuration):
         
+        # Not ready for use
+        
+        # Md5 checksum of config file is generated. Gene prioritisation report
+        # file is created and checksum is included in name to differentiate
+        # different configs. Report saved in given location.
+        
+        checksum = self.generate_config_checksum()
+        
+        with open("""something here?""", "r") as config:
+            
+            report_name = \
+                "gene_prioritisation_report_" + checksum.hexdigest() + ".txt"
+            report = \
+                open((configuration.gene_prioritisation_report_directory + report_name), "w")
+            report.write(config.read() + "\n")
+            report.close()
+            report = \
+                open((configuration.gene_prioritisation_report_directory + report_name), "a")
+            self.data.loc[:, (["Gene_name"] +
+                            ["Interest_score"] + 
+                            self.interesting_features +
+                            ["Scaled_std",
+                            "Scaled_anomalous_score",
+                            "Scaled_enhancer_count",
+                            "Scaled_enhancer_proportion",
+                            "Scaled_specific_gene_expression",
+                            "Scaled_gene_size",
+                            "Scaled_symmetry_ratio",
+                            "Z-Std",
+                            "Z-Anomalous_score",
+                            "Z-Enhancer_count",
+                            "Z-Enhancer_proportion",
+                            "Z-Specific_gene_expression",
+                            "Z-Gene_size",
+                            "Z-Symmetry_ratio"])].to_csv(
+                (configuration.gene_prioritisation_report_directory + report_name),
+                sep = "\t", index = True, mode = "a")            
+            report.close()
+            
+    def generate_config_checksum():
+
+        checksum = hashlib.md5()
+        
+        with open(sys.argv[1], "rb") as config:
+            
+            for chunk in iter(lambda: config.read(4096), b""):
+                
+                checksum.update(chunk)
+            
+        return checksum
+            
         
         
