@@ -168,12 +168,10 @@ class Metrics:
         
         gene_search = pr.PyRanges(self.data)
         elements_search = pr.PyRanges(self.regulatory_data)
-        overlaps = gene_search.intersect(elements_search, strandedness = False)
-        overlaps = overlaps.df
+        self.overlaps = gene_search.intersect(elements_search, strandedness = False)
+        self.overlaps = self.overlaps.df
         
         self.data.drop(["Start", "End"], axis = 1)
-        
-        return overlaps
     
     def count_overlaps_per_gene(self, element_type):
         
@@ -326,37 +324,35 @@ class Metrics:
         ]
         
         for feature in self.interesting_features:
-            gene_data = self.apply_hard_filter(
-                gene_data,
+            self.data = self.apply_hard_filter(
+                self.data,
                 max_filters[self.interesting_features.index(feature)], 
                     feature, 
                     "max"
             )
             
-            gene_data = self.apply_hard_filter(
-                gene_data,
+            self.data = self.apply_hard_filter(
+                self.data,
                 min_filters[self.interesting_features.index(feature)],
                 feature, "min"
             )
-        
-        return gene_data
 
-    def apply_hard_filter(gene_data, filter, feature, minmax):
+    def apply_hard_filter(self, filter, feature, minmax):
 
         #Drops data above max filter or below min filter
 
         if minmax == "max":
-            if filter is not False: gene_data = gene_data.drop(
-                    gene_data[gene_data[feature] > filter].index
+            if filter is not False: self.data = self.data.drop(
+                    self.data[self.data[feature] > filter].index
                 )
             
         elif minmax == "min":
-            if filter is not False: gene_data = gene_data.drop(
-                    gene_data[gene_data[feature] < filter].index
+            if filter is not False: self.data = self.data.drop(
+                    self.data[self.data[feature] < filter].index
                 )
         
         else: 
             print("ERROR : Could not identify minmax.")
         
-        return gene_data
+        
         

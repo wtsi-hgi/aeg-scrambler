@@ -75,14 +75,14 @@ class Config:
         
         self = self.set_config_from_file(self)
         
-    def set_config_from_file(self):
+    def set_config_from_file(self, path):
             
         # Reads user generated config file
         # and changes variables as necessary    
             
         try:
         
-            with open("../reference/config.json", "r") as config_file:
+            with open(path, "r") as config_file:
                 
                 settings = json.load(config_file)
                 

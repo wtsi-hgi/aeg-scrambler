@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from scipy.configmage import gaussian_filter1d
+from scipy.ndimage import gaussian_filter1d
 
-class Coorconfignates:
+class Coordinates:
 
     def __init__(self, config, metrics):
         
@@ -25,12 +25,12 @@ class Coorconfignates:
             self.data.apply(self.step_function_y, args = (self.overlaps,), axis = 1)
         
         self.data = \
-            self.data.sort_values("Interest_score", ascenconfigng = False)\
+            self.data.sort_values("Interest_score", ascending = False)\
                 .reset_index(drop = True)
 
     def step_function_x(row):
         
-        # step_function_mask returns an array of genome coorconfignates within
+        # step_function_mask returns an array of genome coordinates within
         # the search window
         
         return np.arange(row['Search_window_start'], row['Search_window_end'])
@@ -58,7 +58,7 @@ class Coorconfignates:
     def convolve_step_function_to_average_windowed_density \
         (self, config, element_type):
 
-        # X and Y coorconfignates are generated for convolution
+        # X and Y coordinates are generated for convolution
         # of element step function with chosen kernel
 
         print("Converting step functions to convolved average density signal...")
@@ -69,10 +69,10 @@ class Coorconfignates:
             [np.empty(0, dtype = float)] * len(self.data)
         
         self.data = self.data\
-            .sort_values("Interest_score", ascenconfigng = False)\
+            .sort_values("Interest_score", ascending = False)\
             .reset_index(drop = True)
 
-        for index, gene in self.data.head(config.CONVOLUTION_LIMIT).iterrows():
+        for index, gene in self.data.head(config.convolution_limit).iterrows():
             
             kernel = self.get_kernel(config.enhancer_kernel_shape, 
                                 int((config.relative_enhancer_kernel_size * \
@@ -97,7 +97,7 @@ class Coorconfignates:
 
     def get_kernel(kernel_shape, size, sigma):
         
-        # Kernel is generated as numpy array depenconfigng on desired shape and size
+        # Kernel is generated as numpy array depending on desired shape and size
         
         if kernel_shape == "flat":
             
@@ -130,45 +130,33 @@ class Coorconfignates:
         convolution_y = \
             convolution_y[upstream_cut_off_index[0][0]:\
                 downstream_cut_off_index[0][0]]
-
-    def combine_convolutions(config, enhancer_convolution, quiescent_convolution):
-        
-        # combine_convolutions adds convolutions together, 
-        
-        print("Merging convolutions...")
-
-        enhancer_convolution = np.negative(enhancer_convolution)
-
-        self.combined_convolution = np.add(
-            (enhancer_convolution * config.ENHANCER_CONVOLUTION_WEIGHT), 
-            (quiescent_convolution * config.QUIESCENT_CONVOLUTION_WEIGHT))
         
     def find_plateaus(self, config):
         
-        # find_plateaus takes convolved coorconfignates, and applies a threshold to
-        # separate the search window into regions based on the y-value of each
-        # convolved base.
+        # find_plateaus takes convolved coordinates, and applies a
+        # threshold to separate the search window into regions based on
+        # the y-value of each convolved base.
         
-        self.data["Plateau_coorconfignates"] = ""
+        self.data["Plateau_coordinates"] = ""
         self.data["Plateau_starts"] = ""
         self.data["Plateau_ends"] = ""
         
-        self.data = self.data.sort_values("Interest_score", ascenconfigng = False)
+        self.data = self.data.sort_values("Interest_score", ascending = False)
         
-        for index, gene in self.data.head(config.CONVOLUTION_LIMIT).iterrows():
+        for index, gene in self.data.head(config.convolution_limit).iterrows():
             
-            print("Finconfigng plateaus for gene " +
+            print("Finding plateaus for gene " +
                 gene["Gene_name"] +
                 " (" +
                 str(index + 1) +
                 " of " +
-                str(config.CONVOLUTION_LIMIT) +
+                str(config.convolution_limit) +
                 ")...")
             
             convolved_x = gene["Enhancer_convolution_x"]
             convolved_y = gene["Enhancer_convolution_y"]
             convolved_y = np.append(convolved_y, 0)
-            boolean_below_threshold = convolved_y < config.PLATEAU_THRESHOLD
+            boolean_below_threshold = convolved_y < config.plateau_threshold
             boolean_below_threshold = np.concatenate(
                 (boolean_below_threshold[:(int((gene["Gene_start"] -
                                                 convolved_x[0])))], 
@@ -178,14 +166,14 @@ class Coorconfignates:
             
             boolean_below_threshold = \
                 (boolean_below_threshold[:-1] != boolean_below_threshold[1:])
-            plateau_coorconfignates = convolved_x[boolean_below_threshold]
-            plateau_coorconfignates = np.concatenate(
+            plateau_coordinates = convolved_x[boolean_below_threshold]
+            plateau_coordinates = np.concatenate(
                 [[convolved_x[0]], 
-                plateau_coorconfignates, 
+                plateau_coordinates, 
                 [convolved_x[-1]]])
             
-            self.data.at[index, "Plateau_coorconfignates"] = plateau_coorconfignates
-            self.data.at[index, "Plateau_starts"] = plateau_coorconfignates[::2]
-            self.data.at[index, "Plateau_ends"] = plateau_coorconfignates[1::2]
+            self.data.at[index, "Plateau_coordinates"] = plateau_coordinates
+            self.data.at[index, "Plateau_starts"] = plateau_coordinates[::2]
+            self.data.at[index, "Plateau_ends"] = plateau_coordinates[1::2]
             
-            self.data.drop(["Plateau_coorconfignates"], axis = 1)
+            self.data.drop(["Plateau_coordinates"], axis = 1)
