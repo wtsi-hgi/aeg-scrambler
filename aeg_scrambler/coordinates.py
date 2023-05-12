@@ -177,3 +177,28 @@ class Coordinates:
             self.data.at[index, "Plateau_ends"] = plateau_coordinates[1::2]
             
             self.data.drop(["Plateau_coordinates"], axis = 1)
+            
+    def export_convolutions(self, configuration):
+    
+        # Coordinates of convolutions are exported to wig file, for each gene
+        
+        for index, gene in \
+            self.data.head(configuration.convolution_limit).iterrows():
+            with open((configuration.results_directory +
+                gene["Gene_name"] + "_convolutions.wig"), "w") as f:
+                
+                f.write("fixedStep chrom=chr" +
+                    gene["Chromosome"] + " start=" +
+                        str(gene["Enhancer_convolution_x"][0]) + " step=1")
+                f.write("\n")
+        
+            convolution_signal = pd.DataFrame({"Convolution_signal" : \
+                self.data.loc[index, "Enhancer_convolution_y"]})
+            convolution_signal.to_csv(
+                (configuration.results_directory +
+                 gene["Gene_name"] +
+                 "_convolutions.wig"), 
+                sep = "\t", 
+                index = False, 
+                mode = "a", 
+                header = False)
