@@ -9,7 +9,7 @@ import typer
 from .config import Config
 from .gene_annotations import GeneAnnotations
 from .gene_expression import GeneExpression
-from .regulatory_element_annotations import RegulatoryElementAnnotations
+from .regulatory_annotations import RegulatoryAnnotations
 from .metrics import Metrics
 from .coordinates import Coordinates
 from .sequences import Sequences

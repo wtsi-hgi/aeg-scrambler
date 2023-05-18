@@ -1,15 +1,15 @@
 import pandas as pd
 
-class RegulatoryElementAnnotations:
+class RegulatoryAnnotations:
     
     def __init__(self, config):
     
-        self.read_regulatory_element_annotations(
+        self.read_regulatory_annotations(
             config.regulatory_elements_reference)
         self.clean_regulatory_elements(
             self.data, config.enhancer_epigenetic_flags_of_interest)
     
-    def read_regulatory_element_annotations(self, file_path):
+    def read_regulatory_annotations(self, file_path):
         
         """
         Assigns the regulatory elements bed file to a pandas dataframe
