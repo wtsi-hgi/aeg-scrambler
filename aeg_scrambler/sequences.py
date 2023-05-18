@@ -12,7 +12,9 @@ class Sequences:
         
     def initialise_possible_plateau_insertions(self):
         
-        # Creates empty dataframe ready to accept further inputs
+        """
+        Creates empty dataframe ready to accept further inputs
+        """
         
         self.possible_plateau_insertions = \
             pd.DataFrame(columns = ["Sequence_name", "Insertion_sequence", 
@@ -20,7 +22,9 @@ class Sequences:
         
     def iterate_gene_plateaus(self, config):
     
-        # export_plateaus saves plateaus associated with each gene as a bed file
+        """
+        export_plateaus saves plateaus associated with each gene as a bed file
+        """
         
         for index, gene in self.data.head(config.convolution_limit).iterrows():
             
@@ -38,8 +42,10 @@ class Sequences:
         
     def find_fasta(plateaus, config):
         
-        # Takes coordinates of plateaus and returns FASTA
-        # sequence from reference genome
+        """
+        Takes coordinates of plateaus and returns FASTA
+        sequence from reference genome
+        """
         
         plateaus_pr = pr.PyRanges(plateaus)
         
@@ -50,8 +56,10 @@ class Sequences:
 
     def generate_pridict_input(self, config):
         
-        # For each plateau, finds partial insertion sites, 
-        # exports sequences with insertions to csv
+        """
+        For each plateau, finds partial insertion sites, 
+        exports sequences with insertions to csv
+        """
         
         self.plateaus.apply(self.generate_insertion_prefixes_and_suffixes, axis = 1)
         
@@ -65,7 +73,9 @@ class Sequences:
 
     def generate_insertion_prefixes_and_suffixes(self, plateau, config):
         
-        #Iteratively finds all possible partial insertions in order of length
+        """
+        Iteratively finds all possible partial insertions in order of length
+        """
         
         plateau_specific_suggested_insertion_sites = \
             pd.DataFrame(columns = ["Sequence_name", "Insertion_sequence",
@@ -119,7 +129,9 @@ class Sequences:
         
     def find_prefix_suffix_in_plateau(plateau, present_sequence):
         
-        #Searches plateau sequences for partial insertion sequences
+        """
+        Searches plateau sequences for partial insertion sequences
+        """
         
         insertions = \
             re.finditer(pattern = present_sequence, string = plateau["Sequence"])
@@ -129,7 +141,9 @@ class Sequences:
 
     def insert_insertion_sequence(row):
         
-        #Adds missing insertion sequence into partial insertions found in plateaus
+        """
+        Adds missing insertion sequence into partial insertions found in plateaus
+        """
         
         return (row["Plateau_sequence"][:row["Insertion_location"]] + 
                     "(+" +

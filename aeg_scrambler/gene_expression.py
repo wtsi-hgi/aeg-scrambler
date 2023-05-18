@@ -11,8 +11,10 @@ class GeneExpression:
     
     def read_general_expression_data(self, config):
         
-        # Assigns the expression-for-many-cell-types
-        # csv file to a pandas dataframe.
+        """
+        Assigns the expression-for-many-cell-types
+        csv file to a pandas dataframe.
+        """
 
         try:
             
@@ -27,12 +29,14 @@ class GeneExpression:
             
     def clean_general_expression_data(self, config):
     
-        # Cleans the general expression data by dropping irrelevant non-numeric
-        # columns, converting the first row to headers, setting gene name as
-        # index, renaming columns, finding the means and standard deviation of
-        # expression for each gene and the z-score of the cell line of
-        # interest's expression for each gene, dropping irrelevant columns,
-        # and dropping duplicate genes
+        """
+        Cleans the general expression data by dropping irrelevant non-numeric
+        columns, converting the first row to headers, setting gene name as
+        index, renaming columns, finding the means and standard deviation of
+        expression for each gene and the z-score of the cell line of
+        interest's expression for each gene, dropping irrelevant columns,
+        and dropping duplicate genes
+        """
 
         self.general_data = self.general_data \
             .drop(["depmapID", "primary_disease"], axis = 0)
@@ -57,8 +61,10 @@ class GeneExpression:
             
     def find_mean(data):
         
-        # Adds the mean of gene expression to the given expression data frame,
-        # giving a mean for each gene
+        """
+        Adds the mean of gene expression to the given expression data frame,
+        giving a mean for each gene
+        """
         
         data["Mean"] = data.loc[:, data.columns != "Gene_name"].mean(axis = 1)
         
@@ -66,9 +72,11 @@ class GeneExpression:
         
     def find_std(data):
         
-        #Adds the standard deviation to the given expression dataframe, giving the
-        #standard deviation across expression of each gene in all provided cell
-        #types
+        """
+        Adds the standard deviation to the given expression dataframe, giving
+        the standard deviation across expression of each gene in all provided
+        cell types
+        """
         
         data["Std"] = data.loc[:, data.columns != "Gene_name"].std(axis = 1)
         
@@ -76,8 +84,10 @@ class GeneExpression:
     
     def find_anomalous_score_of_gene_expression(data):
     
-        # Adds the z-score of each gene based on its expression
-        # in the cell line of interest compared to all others
+        """
+        Adds the z-score of each gene based on its expression
+        in the cell line of interest compared to all others
+        """
         
         data["Anomalous_score"] = data.apply(lambda gene :
             (gene["General_gene_expression"] -
@@ -87,8 +97,10 @@ class GeneExpression:
     
     def read_specific_expression_data(self, config):
     
-        # Assigns the expression-for-cell-line-of-interest csv file to a pandas
-        # dataframe.
+        """
+        Assigns the expression-for-cell-line-of-interest csv file to a pandas
+        dataframe.
+        """
 
         try:
             self.specific_data = \
@@ -103,9 +115,11 @@ class GeneExpression:
         
     def clean_specific_expression_data(self):
         
-        #Cleans the expression data specific to the cell line of interest by
-        # turning minus infinite strings into a floating point representation
-        # of negative infinity, duplicate genes are dropped
+        """
+        Cleans the expression data specific to the cell line of interest by
+        turning minus infinite strings into a floating point representation
+        of negative infinity, duplicate genes are dropped
+        """
         
         self.specific_data["Specific_gene_expression"] = \
             self.specific_data["Specific_gene_expression"]. \

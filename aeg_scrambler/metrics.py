@@ -47,17 +47,21 @@ class Metrics:
         
     def find_gene_sizes(self):
         
-        #Adds the size of each gene based on its start and end point
+        """
+        Adds the size of each gene based on its start and end point
+        """
         
         self.data["Gene_size"] = self.data["Gene_end"] - self.data["Gene_start"]
     
     def find_interferring_genes(self, config):
     
-        # For each gene, finds the nearest gene upstream and downstream
+        """
+        For each gene, finds the nearest gene upstream and downstream
         
-        # "Start" and "End" are generated for use with PyRanges
-        # module which requires temporary columns "Start" and "End",
-        # they are removed at the end of function
+        "Start" and "End" are generated for use with PyRanges
+        module which requires temporary columns "Start" and "End",
+        they are removed at the end of function
+        """
         
         self.data["Start"] = self.data["Gene_start"]
         self.data["End"] = self.data["Gene_end"]
@@ -120,11 +124,13 @@ class Metrics:
         
     def find_search_windows(self, config):
 
-        # Defines a search window for each gene, based on the number of bases
-        # upstream and downstream specified, the starting point of the window, and
-        # whether the gene itself is included. Search window is foreshorterned if an
-        # interferring gene is within the window, or if the window would include
-        # negative bases.
+        """
+        Defines a search window for each gene, based on the number of bases
+        upstream and downstream specified, the starting point of the window,
+        and whether the gene itself is included. Search window is
+        foreshorterned if an interferring gene is within the window, or if
+        the window would include negative bases.
+        """
         
         if (config.search_type == "whole_gene"):
             downstream_search_start = "Gene_end"
@@ -167,9 +173,12 @@ class Metrics:
     
     def find_element_overlaps_within_search_window(self):
         
-        #PyRanges is used to find specified element type overlaps within search
-        #window given for each gene. "Start" and "End" are generated for PyRanges
-        #and removed subsequently. Overlaps are stored in a new dataframe
+        """
+        PyRanges is used to find specified element type overlaps within search
+        window given for each gene. "Start" and "End" are generated for
+        PyRanges and removed subsequently. Overlaps are stored in a new
+        dataframe
+        """
         
         self.data["Start"] = self.data["Search_window_start"]
         self.data["End"] = self.data["Search_window_end"]
@@ -183,7 +192,9 @@ class Metrics:
     
     def count_overlaps_per_gene(self, element_type):
         
-        #Number of specified element overlaps are counted for each gene.
+        """
+        Number of specified element overlaps are counted for each gene.
+        """
 
         #overlaps.drop(["Start", "End"], axis = 1)
         self.data = pd.merge(
@@ -196,8 +207,10 @@ class Metrics:
         
     def find_nearby_enhancer_densities(self):
 
-        # Density of specifed element overlaps within the given search window is
-        # calculated for each gene.
+        """
+        Density of specifed element overlaps within the given search window is 
+        calculated for each gene.
+        """
         
         self.overlaps["Enhancer_proportion"] = (
             self.overlaps.loc[:, "End"] - self.overlaps.loc[:, "Start"]) /\
@@ -213,8 +226,10 @@ class Metrics:
         
     def find_symmetry_of_elements(self):
         
-        # For each gene calculates the number of elements on one side compared
-        # to the other and produces a score of symmetry
+        """
+        For each gene calculates the number of elements on one side compared 
+        to the other and produces a score of symmetry
+        """
         
         self.overlaps["Overlaps_upstream"] = self.overlaps\
             .apply(lambda overlap : True if overlap["End"] <= 
@@ -236,8 +251,10 @@ class Metrics:
         
     def calculate_interest_score(self, config):
         
-        # Various attributes of each gene are scaled and normallised,
-        # before being weighted and combined into an interest score
+        """
+        Various attributes of each gene are scaled and normallised,
+        before being weighted and combined into an interest score
+        """
         
         scaler = StandardScaler()
         scaled_genes = self.data.loc[:, (["Gene_name"] +
@@ -307,9 +324,9 @@ class Metrics:
 
     def iterate_through_hard_filters(self, config):
 
-        # Calls apply_hard_filter for each feature's min and max filter
-        
-        print("Applying hard filters...")
+        """
+        Calls apply_hard_filter for each feature's min and max filter
+        """
         
         max_filters = [
             config.std_hard_filter_max, 
@@ -347,7 +364,9 @@ class Metrics:
 
     def apply_hard_filter(self, filter, feature, minmax):
 
-        #Drops data above max filter or below min filter
+        """
+        Drops data above max filter or below min filter
+        """
 
         if minmax == "max":
             if filter is not False: self.data = self.data.drop(
@@ -364,11 +383,13 @@ class Metrics:
 
     def export_gene_scores_report(self, configuration):
         
-        # Not ready for use
+        """
+        Not ready for use
         
-        # Md5 checksum of config file is generated. Gene prioritisation report
-        # file is created and checksum is included in name to differentiate
-        # different configs. Report saved in given location.
+        Md5 checksum of config file is generated. Gene prioritisation report
+        file is created and checksum is included in name to differentiate
+        different configs. Report saved in given location.
+        """
         
         checksum = self.generate_config_checksum()
         

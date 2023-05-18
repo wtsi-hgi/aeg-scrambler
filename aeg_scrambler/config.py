@@ -76,9 +76,10 @@ class Config:
         self = self.set_config_from_file(self)
         
     def set_config_from_file(self, path):
+        """
+        Reads user generated config file and changes variables as necessary
+        """    
             
-        # Reads user generated config file
-        # and changes variables as necessary    
             
         try:
         
@@ -210,7 +211,9 @@ class Config:
             
     def print_config(self):
         
-        # Prints the current config that the program will use
+        """
+        Prints the current config that the program will use
+        """
         
         current_config = vars(self)
         print(', '.join("%s: %s" % setting for setting in current_config.items()))
