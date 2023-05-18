@@ -5,6 +5,7 @@ LICENSE file in the root directory of this source tree.
 """
 
 import enum
+import re
 import pandas as pd
 import numpy as np 
 from pathlib import Path
@@ -13,16 +14,26 @@ from abc import abstractmethod, ABC
 class GeneData(ABC):
     skiprows = 0
     columns = None
-    separator = ","
+    separator = "\t"
     
     def __init__(self, filename: Path) -> None:
-        print(f"{self.__class__.__name__}")
         self.filename = filename
+        self.interesting_chromosomes = [str(c) for c in range(23)] + ['X','Y']
         self.data = self.clean(self.load())
 
     def load(self) -> pd.DataFrame:
-        print(f"loading data: sep={self.separator} columns={self.columns}, skiprows={self.skiprows}") 
-        return pd.read_csv(self.filename, names=self.columns, skiprows=self.skiprows, sep=self.separator)
+        return pd.read_csv(
+            self.filename, 
+            names=self.columns, 
+            skiprows=self.skiprows, 
+            sep=self.separator
+        )
+    
+    def __repr__(self) -> str:
+        return f"""
+        Dataframe of type {self.__class__.__name__}, 
+        head:
+        {self.data.head()}"""
     
     @abstractmethod
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -30,11 +41,11 @@ class GeneData(ABC):
         pass
 
 class GeneralData(GeneData):
-    separator = "\t"
+    separator = ","
 
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
         print("cleaning GeneralData")
-        pass
+        return data
     
 
 class SpecificData(GeneData):
@@ -68,8 +79,26 @@ class AnnotationData(GeneData):
     ]
 
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
-        print("cleaning AnnotationData")
-        pass
+        geneNameRegex = "gene_name \"(.*?)\""
+        geneBiotypeRegex = "gene_biotype \"(.*?)\""
+
+        data = data.query('Chromosome in @self.interesting_chromosomes')
+        data = data[data["Type"] == "gene"]
+        data["Gene_biotype"] = data["Attributes"].apply(
+            lambda x : re.findall(geneBiotypeRegex, x)[0]
+            if re.search(geneNameRegex, x) else "None"
+        )
+        data = data[data["Gene_biotype"] == "protein_coding"]
+        
+        data["Gene_name"] = data["Attributes"].apply(
+            lambda x : re.findall(geneNameRegex, x)[0] 
+            if re.search(geneNameRegex, x) else "None"
+        )
+        data = data.drop(["Source", "Type", "Score", "Phase", "Attributes", "Gene_biotype"], axis = 1)
+        data = data.drop_duplicates(keep = False, subset = ["Gene_name"])
+        data = data.rename(columns = {"Start" : "Gene_start", "End" : "Gene_end"})
+    
+        return data
 
     
 class GeneDataLoader:
