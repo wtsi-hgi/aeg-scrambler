@@ -21,7 +21,7 @@ class GeneData(ABC):
         self.data = self.clean(self.load())
 
     def load(self) -> pd.DataFrame:
-        print(f"  loading data: sep={self.separator} columns={self.columns}, skiprows={self.skiprows}") 
+        print(f"loading data: sep={self.separator} columns={self.columns}, skiprows={self.skiprows}") 
         return pd.read_csv(self.filename, names=self.columns, skiprows=self.skiprows, sep=self.separator)
     
     @abstractmethod
@@ -34,6 +34,7 @@ class GeneralData(GeneData):
 
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
         print("cleaning GeneralData")
+        pass
     
 
 class SpecificData(GeneData):
@@ -68,6 +69,7 @@ class AnnotationData(GeneData):
 
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
         print("cleaning AnnotationData")
+        pass
 
     
 class GeneDataLoader:
@@ -93,9 +95,9 @@ data_loader = GeneDataLoader()
 #b = data_loader.load("b.csv", GeneDataLoader.Type.specific)
 #c = data_loader.load("c.csv", GeneDataLoader.Type.annotation)    
 
-specificPath = "specific/path/here"
-generalPath = "general/path/here"
-annotationPath = "annotation/path/here"
+specificPath = "/Users/km34/Documents/Automated-Enhancer-Gene-SCRAMBLEr/Expression_HAP1_c12.tsv"
+generalPath = "/Users/km34/Documents/Automated-Enhancer-Gene-SCRAMBLEr/CCLE_expressions_22Q4.csv"
+annotationPath = "/Users/km34/Documents/Homo_sapiens.GRCh38.109.gtf"
 
 a = GeneralData(generalPath)
 b = SpecificData(specificPath)
