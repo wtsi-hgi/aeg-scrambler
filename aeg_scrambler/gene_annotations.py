@@ -10,7 +10,9 @@ class GeneAnnotations:
             
     def read_gene_annotations(self, file_path):
         
-        #Reads gene annotations gtf file into pandas dataframe
+        """
+        Reads gene annotations gtf file into pandas dataframe
+        """
         
         try:
             
@@ -44,7 +46,9 @@ class GeneAnnotations:
             
     def clean_gene_annotations(self, config):
         
-        # Puts annotation data into correct format and removes unecessary data
+        """
+        Puts annotation data into correct format and removes unecessary data
+        """
         
         self.data = self.data.loc[self.data["Chromosome"]
                                   .isin(config.chromosomes_of_interest)]

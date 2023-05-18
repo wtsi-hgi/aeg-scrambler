@@ -24,7 +24,10 @@ def configure(configuration, path):
 
 @app.command()
 def rank(configuration):
-    # Prioritises genes based on weights of various factors
+    
+    """
+    Prioritises genes based on weights of various factors
+    """
     
     instance_gene_annotations = GeneAnnotations(configuration)
     instance_gene_expressions = GeneExpression(configuration)
@@ -41,30 +44,41 @@ def rank(configuration):
 
 @app.command()
 def tune(gene, metrics):
-    # Tune the weights to find the local maxima rank of a specific gene
+    """
+    Tune the weights to find the local maxima rank of a specific gene
+    """
     pass
 
 @app.command()
 def design(configuration, metrics):
-    # Taking a list of ranked genes, will design pegRNA sequences for the 
-    # regions between enhancers and call PRIDICT to find the most efficient
-    # in each inter-enhancer sequence
+    
+    """
+    Taking a list of ranked genes, will design pegRNA sequences for the 
+    regions between enhancers and call PRIDICT to find the most efficient
+    in each inter-enhancer sequence
+    """
     
     coordinates = Coordinates(configuration, metrics)
     sequences = Sequences(configuration, coordinates)
 
 @app.command()
 def explore():
-    # Taking a list of genes will display their distribution and 
-    # generate several sets of graphs for several features
+    
+    """
+    Taking a list of genes will display their distribution and 
+    generate several sets of graphs for several features
+    """
     
     print("Exploring")
     pass
 
 @app.command()
 def export():
-    # Export either a wig or bed file of plateau regions,
-    # convolution signal etc as decided by options
+    
+    """
+    Export either a wig or bed file of plateau regions,
+    convolution signal etc as decided by options
+    """
 
     print("Exporting")
 

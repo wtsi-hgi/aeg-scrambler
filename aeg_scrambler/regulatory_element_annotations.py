@@ -11,7 +11,9 @@ class RegulatoryElementAnnotations:
     
     def read_regulatory_element_annotations(self, file_path):
         
-        # Assigns the regulatory elements bed file to a pandas dataframe
+        """
+        Assigns the regulatory elements bed file to a pandas dataframe
+        """
 
         try:
             
@@ -27,7 +29,9 @@ class RegulatoryElementAnnotations:
             
     def clean_regulatory_elements(self, flags_of_interest):
     
-        # Put regulatory data into correct format and remove unecessary data
+        """
+        Put regulatory data into correct format and remove unecessary data
+        """
             
         self.data["Chromosome"] = \
             self.data["Chromosome"].apply(lambda x : x[3:])

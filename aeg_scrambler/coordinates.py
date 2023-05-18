@@ -14,10 +14,10 @@ class Coordinates:
 
     def generate_step_function_of_overlaps(self):
         
-        # generate_step_function_of_overlaps defines two new columns on the passed
-        # dataframe, to be used in an enhancer step function.
-        
-        print("Generating step function of overlaps within search window...")
+        """
+        generate_step_function_of_overlaps defines two new columns on the passed
+        dataframe, to be used in an enhancer step function.
+        """
         
         self.data['Enhancer_step_function_x'] = \
             self.data.apply(self.step_function_x, axis = 1)
@@ -30,15 +30,19 @@ class Coordinates:
 
     def step_function_x(row):
         
-        # step_function_mask returns an array of genome coordinates within
-        # the search window
+        """
+        step_function_mask returns an array of genome coordinates within
+        the search window
+        """
         
         return np.arange(row['Search_window_start'], row['Search_window_end'])
 
     def step_function_y(self, row):
         
-        # Generates a mask for each overlap, and combines them into a step function
-        # for the search window
+        """
+        Generates a mask for each overlap, and combines them into a step
+        function for the search window
+        """
         
         step_function = np.zeros(len(row['Enhancer_step_function_x']), dtype = int)
         overlapping_elements = \
@@ -58,10 +62,10 @@ class Coordinates:
     def convolve_step_function_to_average_windowed_density \
         (self, config, element_type):
 
-        # X and Y coordinates are generated for convolution
-        # of element step function with chosen kernel
-
-        print("Converting step functions to convolved average density signal...")
+        """
+        X and Y coordinates are generated for convolution
+        of element step function with chosen kernel
+        """
 
         self.data[(element_type + "_convolution_x")] = \
             [np.empty(0, dtype = float)] * len(self.data)
@@ -97,7 +101,9 @@ class Coordinates:
 
     def get_kernel(kernel_shape, size, sigma):
         
-        # Kernel is generated as numpy array depending on desired shape and size
+        """
+        Kernel is generated as numpy array depending on desired shape and size
+        """
         
         if kernel_shape == "flat":
             
@@ -115,8 +121,10 @@ class Coordinates:
 
     def trim_convolution_ends(gene, convolution_x, convolution_y):
         
-        # Trims the ends of the convolutions 
-        # which overlap the ends of the step functions
+        """
+        Trims the ends of the convolutions 
+        which overlap the ends of the step functions
+        """
         
         upstream_cut_off = gene["Enhancer_step_function_x"][0]
         downstream_cut_off = gene["Enhancer_step_function_x"][-1]
@@ -133,9 +141,11 @@ class Coordinates:
         
     def find_plateaus(self, config):
         
-        # find_plateaus takes convolved coordinates, and applies a
-        # threshold to separate the search window into regions based on
-        # the y-value of each convolved base.
+        """
+        find_plateaus takes convolved coordinates, and applies a
+        threshold to separate the search window into regions based on
+        the y-value of each convolved base.
+        """
         
         self.data["Plateau_coordinates"] = ""
         self.data["Plateau_starts"] = ""
@@ -180,7 +190,9 @@ class Coordinates:
             
     def export_convolutions(self, configuration):
     
-        # Coordinates of convolutions are exported to wig file, for each gene
+        """
+        Coordinates of convolutions are exported to wig file, for each gene
+        """
         
         for index, gene in \
             self.data.head(configuration.convolution_limit).iterrows():
