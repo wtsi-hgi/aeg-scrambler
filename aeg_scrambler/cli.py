@@ -17,6 +17,15 @@ from .sequences import Sequences
 app = typer.Typer()
 
 @app.command()
+def hello(name):
+    
+    """
+    Look for and read config file, then update config
+    """
+    
+    print(f'Hello {name}!')
+    
+@app.command()
 def configure(configuration, path):
     
     """
