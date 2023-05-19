@@ -21,10 +21,12 @@ class Tuner:
         
     def gradient_descent(self):
         
-        # Performs iterations to improve weights based on chosen genes,
-        # finds current residuals of chosen genes, calculates new
-        # probes from current set of weights, finds the gradients of
-        # each probe and replaces current weights with the weights of the best
+        """
+        Performs iterations to improve weights based on chosen genes,
+        finds current residuals of chosen genes, calculates new
+        probes from current set of weights, finds the gradients of
+        each probe and replaces current weights with the weights of the best
+        """
         
         for loop in loops:
             
@@ -35,8 +37,10 @@ class Tuner:
     
     def find_residuals(self, metrics):
         
-        # Takes a list of ranked genes and an array of chosen genes, finds the
-        # mean squared 'error' of their indicies
+        """
+        Takes a list of ranked genes and an array of chosen genes, finds the
+        mean squared 'error' of their indicies
+        """
         
         mse = (metrics.data[metrics.data["Gene_name"] \
             .isin(self.chosen_genes)]["index"] ** 2).mean()
@@ -45,9 +49,11 @@ class Tuner:
     
     def calculate_probe_weights(self):
 
-        # Applies the learning rate to each weight,
-        # creating a probe in the positive and negative direction
-        # of each dimension
+        """
+        Applies the learning rate to each weight,
+        creating a probe in the positive and negative direction
+        of each dimension
+        """
 
         self.probe_weights = []
         for weight in self.weights:
@@ -64,9 +70,11 @@ class Tuner:
                 
     def probe_scramble_space(self):
         
-        # Iterates over list of probes, creates ranked list for each probe,
-        # finds the residuals and gradients of each and
-        # selects the steepest gradient
+        """
+        Iterates over list of probes, creates ranked list for each probe,
+        finds the residuals and gradients of each and
+        selects the steepest gradient
+        """
         
         steepest_probe_gradients = [0] * len(self.current_residuals)
         

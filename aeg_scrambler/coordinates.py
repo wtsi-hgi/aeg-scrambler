@@ -15,14 +15,15 @@ class Coordinates:
     def generate_step_function_of_overlaps(self):
         
         """
-        generate_step_function_of_overlaps defines two new columns on the passed
-        dataframe, to be used in an enhancer step function.
+        generate_step_function_of_overlaps defines two new columns on the
+        passed dataframe, to be used in an enhancer step function.
         """
         
         self.data['Enhancer_step_function_x'] = \
             self.data.apply(self.step_function_x, axis = 1)
         self.data['Enhancer_step_function_y'] = \
-            self.data.apply(self.step_function_y, args = (self.overlaps,), axis = 1)
+            self.data.apply(self.step_function_y, args = (self.overlaps,),
+                            axis = 1)
         
         self.data = \
             self.data.sort_values("Interest_score", ascending = False)\
@@ -44,14 +45,17 @@ class Coordinates:
         function for the search window
         """
         
-        step_function = np.zeros(len(row['Enhancer_step_function_x']), dtype = int)
+        step_function = np.zeros(len(row['Enhancer_step_function_x']),
+                                 dtype = int)
         overlapping_elements = \
             self.overlaps.loc[self.overlaps["Gene_name"] == row["Gene_name"]]
         
         for i in range(len(overlapping_elements)):
             
-            start = overlapping_elements.at[overlapping_elements.index[i], 'Start']
-            stop = overlapping_elements.at[overlapping_elements.index[i], 'End']
+            start = overlapping_elements.at[overlapping_elements.index[i],
+                                            'Start']
+            stop = overlapping_elements.at[overlapping_elements.index[i],
+                                           'End']
             
             in_range = np.logical_and(
                 row['Enhancer_step_function_x'] >= \
@@ -96,8 +100,10 @@ class Coordinates:
             gene, convolution_x, convolution_y = \
                 self.trim_convolution_ends(gene, convolution_x, convolution_y)
 
-            self.data.at[index, (element_type + "_convolution_x")] = convolution_x
-            self.data.at[index, (element_type + "_convolution_y")] = convolution_y
+            self.data.at[index, (element_type + "_convolution_x")] = \
+                convolution_x
+            self.data.at[index, (element_type + "_convolution_y")] = \
+                convolution_y
 
     def get_kernel(kernel_shape, size, sigma):
         
@@ -129,8 +135,10 @@ class Coordinates:
         upstream_cut_off = gene["Enhancer_step_function_x"][0]
         downstream_cut_off = gene["Enhancer_step_function_x"][-1]
         
-        upstream_cut_off_index = np.where(convolution_x == upstream_cut_off)
-        downstream_cut_off_index = np.where(convolution_x == downstream_cut_off)
+        upstream_cut_off_index = \
+            np.where(convolution_x == upstream_cut_off)
+        downstream_cut_off_index = \
+            np.where(convolution_x == downstream_cut_off)
         
         convolution_x = \
             convolution_x[upstream_cut_off_index[0][0]:\
