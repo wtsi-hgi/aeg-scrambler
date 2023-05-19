@@ -18,7 +18,10 @@ app = typer.Typer()
 
 @app.command()
 def configure(configuration, path):
-    # Look for and read config file, then update config
+    
+    """
+    Look for and read config file, then update config
+    """
     
     configuration.set_config_from_file(configuration, path)
 
