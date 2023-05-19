@@ -19,15 +19,15 @@ class Metrics:
             "Gene_size", "Symmetry_ratio"
             ]
         self.regulatory_data = regulatory_element_annotations
-        self.merge_genetic_data(self, gene_annotations, gene_expression)
-        self.find_gene_sizes(self)
-        self.find_interferring_genes(self, config)
-        self.find_search_windows(self, config)
-        self.find_element_overlaps_within_search_window(self)
-        self.count_overlaps_per_gene(self, element_type)
-        self.find_nearby_enhancer_densities(self)
-        self.find_symmetry_of_elements(self)
-        self.calculate_interest_score(self, config)
+        self.merge_genetic_data(gene_annotations, gene_expression)
+        self.find_gene_sizes()
+        self.find_interferring_genes(config)
+        self.find_search_windows(config)
+        self.find_element_overlaps_within_search_window()
+        self.count_overlaps_per_gene(element_type)
+        self.find_nearby_enhancer_densities()
+        self.find_symmetry_of_elements()
+        self.calculate_interest_score(config)
         self.interesting_features = ["Std",
                                      "Anomalous_score",
                                      "Enhancer_count",

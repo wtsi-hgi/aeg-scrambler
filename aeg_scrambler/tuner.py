@@ -88,5 +88,3 @@ class Tuner:
             if probe_gradients.mean() > steepest_probe_gradients.mean():
                 steepest_probe_gradients = probe_gradients
                 self.new_weights = probe
-            
-            

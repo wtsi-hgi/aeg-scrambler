@@ -8,8 +8,8 @@ class Coordinates:
         
         self.data = metrics.data
         self.overlaps = metrics.overlaps
-        self.generate_step_function_of_overlaps(self)
-        self.convolve_step_function_to_average_windowed_density(self, config, element_type)
+        self.generate_step_function_of_overlaps()
+        self.convolve_step_function_to_average_windowed_density(config, element_type)
         
 
     def generate_step_function_of_overlaps(self):

@@ -1,5 +1,6 @@
 import json
 
+
 class Config:
     
     def __init__(self):
@@ -10,6 +11,7 @@ class Config:
         self.regulatory_elements_reference = ""
         self.general_expression_by_cell_line_reference_path = ""
         self.specific_expression_by_cell_line_reference_path = ""
+        self.hic_path = ""
         self.reference_genome = ""
         
         self.cell_line_of_interest = "HAP1"
@@ -99,6 +101,8 @@ class Config:
                     settings["general_expression_by_cell_line_reference_path"]
                 self.specific_expression_by_cell_line_reference_path = \
                     settings["specific_expression_by_cell_line_reference_path"]
+                self.hic_path = \
+                    settings["hic_path"]
                 self.reference_genome = \
                     settings["reference_genome"]
 
@@ -175,7 +179,7 @@ class Config:
                 self.relative_enhancer_kernel_sigma = \
                     settings["relative_enhancer_kernel_sigma"]
 
-                self.quiescent_kernel_shap = \
+                self.quiescent_kernel_shape = \
                     settings["quiescent_kernel_shape"]
                 self.quiescent_kernel_size_type = \
                     settings["quiescent_kernel_size_type"]
@@ -216,4 +220,4 @@ class Config:
         """
         
         current_config = vars(self)
-        print(', '.join("%s: %s" % setting for setting in current_config.items()))
+        print("\n".join("%s: %s" % setting for setting in current_config.items()))
