@@ -32,7 +32,7 @@ def rank(configuration):
     instance_gene_annotations = GeneAnnotations(configuration)
     instance_gene_expressions = GeneExpression(configuration)
     instance_regulatory_element_annotations = \
-        RegulatoryElementAnnotations(configuration)
+        RegulatoryAnnotations(configuration)
 
     instance_metrics = Metrics(
         configuration,
