@@ -19,11 +19,31 @@ from sequences import Sequences
 app = typer.Typer()
 
 @app.command()
-def hello(name: Optional[str] = None):
-    if name:
-        typer.echo(f"Hello {name}")
+def test(path: Optional[str] = None):
+    
+    #configure_settings command
+    config = Config()
+    if path:
+        config.set_config_from_file(path)
     else:
-        typer.echo("Hello World!")
+        config.set_config_from_file("../../config.yaml")
+    
+    #view_settings command
+    typer.echo("Current settings:")
+    config.print_config()
+    
+    #rank command
+    gene_annotations = GeneAnnotations(config)
+    gene_expressions = GeneExpression(config)
+    regulatory_annotations = RegulatoryAnnotations(config)
+    metrics = Metrics(config,
+                      gene_annotations,
+                      regulatory_annotations,
+                      gene_expressions)
+    
+    #export_rank command
+    metrics.export_gene_scores_report(config)
+    
 
 @app.command()
 def configure_settings(path: Optional[str] = None):
@@ -59,8 +79,7 @@ def rank(configuration):
     
     instance_gene_annotations = GeneAnnotations(configuration)
     instance_gene_expressions = GeneExpression(configuration)
-    instance_regulatory_annotations = \
-        RegulatoryAnnotations(configuration)
+    instance_regulatory_annotations = RegulatoryAnnotations(configuration)
 
     instance_metrics = Metrics(
         configuration,

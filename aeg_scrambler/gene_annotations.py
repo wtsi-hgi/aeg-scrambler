@@ -5,10 +5,10 @@ class GeneAnnotations:
     
     def __init__(self, config):
         
-        self.read_gene_annotations(self, config.gene_annotation_reference)
-        self.clean_gene_annotations(self)
+        self.read_gene_annotations(config)
+        self.clean_gene_annotations(config)
             
-    def read_gene_annotations(self, file_path):
+    def read_gene_annotations(self, config):
         
         """
         Reads gene annotations gtf file into pandas dataframe
@@ -17,7 +17,7 @@ class GeneAnnotations:
         try:
             
             self.data = \
-                pd.read_csv(file_path,
+                pd.read_csv(config.gene_annotation_reference,
                             sep = "\t",
                             names = ["Chromosome",
                                      "Source",

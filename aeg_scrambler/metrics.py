@@ -3,7 +3,6 @@ import pandas as pd
 import pyranges as pr
 from scipy import stats
 from sklearn.preprocessing import StandardScaler
-import hashlib
 
 class Metrics:
     
@@ -13,21 +12,6 @@ class Metrics:
                  regulatory_element_annotations,
                  gene_expression):
         
-        self.interesting_features = [
-            "Std", "Anomalous_score", "Enhancer_count",
-            "Enhancer_proportion", "Specific_gene_expression",
-            "Gene_size", "Symmetry_ratio"
-            ]
-        self.regulatory_data = regulatory_element_annotations
-        self.merge_genetic_data(gene_annotations, gene_expression)
-        self.find_gene_sizes()
-        self.find_interferring_genes(config)
-        self.find_search_windows(config)
-        self.find_element_overlaps_within_search_window()
-        self.count_overlaps_per_gene(element_type)
-        self.find_nearby_enhancer_densities()
-        self.find_symmetry_of_elements()
-        self.calculate_interest_score(config)
         self.interesting_features = ["Std",
                                      "Anomalous_score",
                                      "Enhancer_count",
@@ -35,6 +19,16 @@ class Metrics:
                                      "Specific_gene_expression",
                                      "Gene_size",
                                      "Symmetry_ratio"]
+        self.regulatory_data = regulatory_element_annotations.data
+        self.merge_genetic_data(gene_annotations, gene_expression)
+        self.find_gene_sizes()
+        self.find_interferring_genes(config)
+        self.find_search_windows(config)
+        self.find_element_overlaps_within_search_window()
+        self.count_overlaps_per_gene()
+        self.find_nearby_enhancer_densities()
+        self.find_symmetry_of_elements()
+        self.calculate_interest_score(config)
         
     def merge_genetic_data(self, gene_annotations, gene_expression):
         
@@ -185,12 +179,13 @@ class Metrics:
         
         gene_search = pr.PyRanges(self.data)
         elements_search = pr.PyRanges(self.regulatory_data)
-        self.overlaps = gene_search.intersect(elements_search, strandedness = False)
+        self.overlaps = gene_search.intersect(elements_search,
+                                              strandedness = False)
         self.overlaps = self.overlaps.df
         
         self.data.drop(["Start", "End"], axis = 1)
     
-    def count_overlaps_per_gene(self, element_type):
+    def count_overlaps_per_gene(self):
         
         """
         Number of specified element overlaps are counted for each gene.
@@ -200,7 +195,7 @@ class Metrics:
         self.data = pd.merge(
             self.data, 
             self.overlaps.groupby("Gene_name").size().reset_index(
-            name = (element_type + "_count")), 
+            name = ("Enhancer_count")), 
                 on = "Gene_name", 
                 how = "inner"
             )
@@ -216,13 +211,13 @@ class Metrics:
             self.overlaps.loc[:, "End"] - self.overlaps.loc[:, "Start"]) /\
                 self.overlaps.loc[:, "Search_window_size"]
         
-        self.overlaps = self.overlaps.loc[
+        summed_overlaps = self.overlaps.loc[
             :, 
             ["Gene_name", "Enhancer_proportion"]].groupby(
             ["Gene_name"], 
             as_index = False)["Enhancer_proportion"].sum().reset_index()
         
-        self.data = pd.merge(self.data, self.overlaps, on = "Gene_name")
+        self.data = pd.merge(self.data, summed_overlaps, on = "Gene_name")
         
     def find_symmetry_of_elements(self):
         
@@ -260,11 +255,18 @@ class Metrics:
         scaled_genes = self.data.loc[:, (["Gene_name"] +
                                          self.interesting_features)]
         scaled_genes.loc[:, self.interesting_features] = \
-            scaler.fit_transform(scaled_genes. \
-                loc[:, self.interesting_features])
+            scaler.fit_transform(scaled_genes
+                                 .loc[:, self.interesting_features])
         
-        for feature in self.interesting_features:
-            self.data["Z-" + feature] = stats.zscore(self.data[feature])
+        #for feature in self.interesting_features:
+        #    
+        #    print(feature)
+        #    print(type(self.data[feature]))
+        #    print(self.data[feature])
+        #    print(self.data[feature].to_numpy())
+        #    self.data["Z-" + feature] = stats.zscore(self.data[feature]
+        #                                             .to_numpy())
+        #    print(self.data["Z-" + feature])
         
         scaled_genes = scaled_genes.assign(
             Interest_score = (
@@ -285,7 +287,7 @@ class Metrics:
                 scaled_genes["Symmetry_ratio"] * \
                     config.relative_symmetry_weight
             )
-        ).sort_values("Interest_score", ascenconfigng=False)
+        ).sort_values("Interest_score", ascending=False)
         
         scaled_genes = scaled_genes.rename(
             columns = {
@@ -315,12 +317,15 @@ class Metrics:
             ],
             on = "Gene_name"
         )
-        self.data = self.iterate_through_hard_filters()
-        self.data = self.data.sort_values(
-            "Interest_score", ascending = False).reset_index()
         
-        for feature in self.interesting_features:
-            self.data["Z-" + feature] = stats.zscore(self.data[feature])
+        self.iterate_through_hard_filters(config)
+        self.data.sort_values("Interest_score",
+                              ascending = False,
+                              inplace = True)
+        self.data.reset_index(inplace = True)
+        
+        #for feature in self.interesting_features:
+        #    self.data["Z-" + feature] = stats.zscore(self.data[feature])
 
     def iterate_through_hard_filters(self, config):
 
@@ -349,17 +354,17 @@ class Metrics:
         ]
         
         for feature in self.interesting_features:
-            self.data = self.apply_hard_filter(
-                self.data,
-                max_filters[self.interesting_features.index(feature)], 
-                    feature, 
-                    "max"
+            
+            self.apply_hard_filter(
+                max_filters[self.interesting_features.index(feature)],
+                feature,
+                "max"
             )
             
-            self.data = self.apply_hard_filter(
-                self.data,
+            self.apply_hard_filter(
                 min_filters[self.interesting_features.index(feature)],
-                feature, "min"
+                feature,
+                "min"
             )
 
     def apply_hard_filter(self, filter, feature, minmax):
@@ -381,7 +386,7 @@ class Metrics:
         else: 
             print("ERROR : Could not identify minmax.")
 
-    def export_gene_scores_report(self, configuration):
+    def export_gene_scores_report(self, config):
         
         """
         Not ready for use
@@ -391,18 +396,18 @@ class Metrics:
         different configs. Report saved in given location.
         """
         
-        checksum = self.generate_config_checksum()
+        checksum = config.generate_config_checksum()
+        report_path = config.gene_prioritisation_report_directory + \
+            "gene_rankings_" + checksum[:8] + ".txt"
         
-        with open("""something here?""", "r") as config:
-            
-            report_name = \
-                "gene_prioritisation_report_" + checksum.hexdigest() + ".txt"
-            report = \
-                open((configuration.gene_prioritisation_report_directory + report_name), "w")
-            report.write(config.read() + "\n")
-            report.close()
-            report = \
-                open((configuration.gene_prioritisation_report_directory + report_name), "a")
+        
+        with open(report_path, "w") as report:
+
+            current_config = vars(config)
+            report.write("\n"
+                         .join("%s: %s" % setting for 
+                               setting in
+                               current_config.items()))
             self.data.loc[:, (["Gene_name"] +
                             ["Interest_score"] + 
                             self.interesting_features +
@@ -413,28 +418,14 @@ class Metrics:
                             "Scaled_specific_gene_expression",
                             "Scaled_gene_size",
                             "Scaled_symmetry_ratio",
-                            "Z-Std",
-                            "Z-Anomalous_score",
-                            "Z-Enhancer_count",
-                            "Z-Enhancer_proportion",
-                            "Z-Specific_gene_expression",
-                            "Z-Gene_size",
-                            "Z-Symmetry_ratio"])].to_csv(
-                (configuration.gene_prioritisation_report_directory + report_name),
-                sep = "\t", index = True, mode = "a")            
-            report.close()
-            
-    def generate_config_checksum():
-
-        checksum = hashlib.md5()
-        
-        with open(sys.argv[1], "rb") as config:
-            
-            for chunk in iter(lambda: config.read(4096), b""):
-                
-                checksum.update(chunk)
-            
-        return checksum
-            
-        
-        
+                            #"Z-Std",
+                            #"Z-Anomalous_score",
+                            #"Z-Enhancer_count",
+                            #"Z-Enhancer_proportion",
+                            #"Z-Specific_gene_expression",
+                            #"Z-Gene_size",
+                            #"Z-Symmetry_ratio"
+                            ])].to_csv(report_path,
+                                       sep = "\t",
+                                       index = True,
+                                       mode = "a")

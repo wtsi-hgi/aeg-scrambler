@@ -4,12 +4,10 @@ class RegulatoryAnnotations:
     
     def __init__(self, config):
     
-        self.read_regulatory_annotations(
-            config.regulatory_elements_reference)
-        self.clean_regulatory_elements(
-            self.data, config.enhancer_epigenetic_flags_of_interest)
+        self.read_regulatory_annotations(config)
+        self.clean_regulatory_elements(config)
     
-    def read_regulatory_annotations(self, file_path):
+    def read_regulatory_annotations(self, config):
         
         """
         Assigns the regulatory elements bed file to a pandas dataframe
@@ -19,7 +17,7 @@ class RegulatoryAnnotations:
             
             self.data = \
                 pd.read_csv(
-                    file_path, sep = "\t",
+                    config.regulatory_elements_reference, sep = "\t",
                     names = ["Chromosome", "Start", "End", "Flag"]
                     )
         
@@ -27,7 +25,7 @@ class RegulatoryAnnotations:
             
             print("ERROR: Could not read regulatory elements file.")
             
-    def clean_regulatory_elements(self, flags_of_interest):
+    def clean_regulatory_elements(self, config):
     
         """
         Put regulatory data into correct format and remove unecessary data
@@ -35,5 +33,7 @@ class RegulatoryAnnotations:
             
         self.data["Chromosome"] = \
             self.data["Chromosome"].apply(lambda x : x[3:])
-        self.data = self.data[self.data["Flag"].isin(flags_of_interest)]
+        self.data = self.data[self.data["Flag"]
+                              .isin(config
+                                    .enhancer_epigenetic_flags_of_interest)]
         self.data = self.data.drop(["Flag"], axis = 1)
