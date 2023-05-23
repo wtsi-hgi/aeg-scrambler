@@ -21,18 +21,18 @@ app = typer.Typer()
 @app.command()
 def test(path: Optional[str] = None):
     
-    #configure_settings command
+    # config --set
     config = Config()
     if path:
         config.set_config_from_file(path)
     else:
         config.set_config_from_file("../../config.yaml")
     
-    #view_settings command
+    # config --view
     typer.echo("Current settings:")
     config.print_config()
     
-    #rank command
+    # rank
     gene_annotations = GeneAnnotations(config)
     gene_expressions = GeneExpression(config)
     regulatory_annotations = RegulatoryAnnotations(config)
@@ -41,9 +41,21 @@ def test(path: Optional[str] = None):
                       regulatory_annotations,
                       gene_expressions)
     
-    #export_rank command
+    # rank --tune
+    
+    # rank --view
+    
+    # rank --export
     metrics.export_gene_scores_report(config)
     
+    # cluster
+    coordinates = Coordinates(config, metrics)
+    
+    # cluster --export
+    coordinates.export_convolutions(config)
+    
+    # design
+    sequences = Sequences(config, coordinates)
 
 @app.command()
 def configure_settings(path: Optional[str] = None):

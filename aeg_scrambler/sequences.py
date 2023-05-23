@@ -8,7 +8,8 @@ class Sequences:
     def __init__(self, config, coordinates):
         
         self.data = coordinates.data
-        self.initialise_possible_plateau_insertions(self)
+        self.initialise_possible_plateau_insertions()
+        self.iterate_gene_plateaus(config)
         
     def initialise_possible_plateau_insertions(self):
         
@@ -28,31 +29,31 @@ class Sequences:
         
         for index, gene in self.data.head(config.convolution_limit).iterrows():
             
-            plateaus = pd.DataFrame(
+            self.plateaus = pd.DataFrame(
                 {"Start" : self.data.loc[index, "Plateau_starts"], 
                 "End" : self.data.loc[index, "Plateau_ends"]
                 }
             )
-            plateaus["Gene_name"] = gene["Gene_name"]
-            plateaus["Chromosome"] = "chr" + gene["Chromosome"]
-            plateaus["Strand"] = gene["Strand"]
+            self.plateaus["Gene_name"] = gene["Gene_name"]
+            self.plateaus["Chromosome"] = "chr" + gene["Chromosome"]
+            self.plateaus["Strand"] = gene["Strand"]
             
-            self.find_fasta(plateaus, config)
-            self.generate_pridict_input(plateaus)
+            self.find_fasta(config)
+            self.generate_pridict_input(config)
         
-    def find_fasta(plateaus, config):
+    def find_fasta(self, config):
         
         """
         Takes coordinates of plateaus and returns FASTA
         sequence from reference genome
         """
         
-        plateaus_pr = pr.PyRanges(plateaus)
+        plateaus_pr = pr.PyRanges(self.plateaus)
         
         seq = pr.get_sequence(plateaus_pr, config.reference_genome)
         plateaus_pr.seq = seq
-        plateaus = plateaus_pr.df
-        plateaus = plateaus.rename(columns = {"seq" : "Sequence"})
+        self.plateaus = plateaus_pr.df
+        self.plateaus.rename(columns = {"seq" : "Sequence"}, inplace = True)
 
     def generate_pridict_input(self, config):
         
@@ -61,10 +62,15 @@ class Sequences:
         exports sequences with insertions to csv
         """
         
-        self.plateaus.apply(self.generate_insertion_prefixes_and_suffixes, axis = 1)
+        self.plateaus.apply(self.generate_insertion_prefixes_and_suffixes,
+                            args = (config),
+                            axis = 1,
+                            )
         
-        self.possible_plateau_insertions["Sequence"] = self.possible_plateau_insertions\
-            .apply(self.insert_insertion_sequence, axis = 1)
+        self.possible_plateau_insertions["Sequence"] = \
+            self.possible_plateau_insertions.apply(self.
+                                                   insert_insertion_sequence,
+                                                   axis = 1)
         
         self.possible_plateau_insertions\
             .to_csv((config.results_directory + "sequences_for_pridict.csv"),
@@ -84,7 +90,8 @@ class Sequences:
         for number_of_bases_absent in range(0, len(config.inserted_sequence)):
         
             for insertion_sequence_position_being_checked in \
-                range(0,(len(config.inserted_sequence) - number_of_bases_absent)):
+                range(0,(len(config.inserted_sequence) -
+                         number_of_bases_absent)):
                 
                 absent_sequence = \
                     config.inserted_sequence\
@@ -98,14 +105,21 @@ class Sequences:
                                 [(insertion_sequence_position_being_checked +
                                 number_of_bases_absent):]
         
-                insertion_positions = \
-                    self.find_prefix_suffix_in_plateau(plateau, present_sequence)
+                insertion_positions = self.find_prefix_suffix_in_plateau(
+                    plateau,
+                    present_sequence
+                )
                 
                 for position in insertion_positions:
                 
                     new_row = pd.Series({"Sequence_name" : \
-                        (plateau["Gene_name"] + " " + plateau["Chromosome"] +
-                        " " + plateau["Strand"] + " "  + str(plateau["Start"]) +
+                        (plateau["Gene_name"] +
+                         " " +
+                         plateau["Chromosome"] +
+                        " " +
+                        plateau["Strand"] +
+                        " "  +
+                        str(plateau["Start"]) +
                         "-" + str(plateau["End"])),
                         "Insertion_sequence" : absent_sequence,
                         "Insertion_location" : (position + \
@@ -138,11 +152,12 @@ class Sequences:
         insertion_positions = [index.start() for index in insertions]
         
         return insertion_positions
-
+    
     def insert_insertion_sequence(row):
         
         """
-        Adds missing insertion sequence into partial insertions found in plateaus
+        Adds missing insertion sequence into partial insertions
+        found in plateaus
         """
         
         return (row["Plateau_sequence"][:row["Insertion_location"]] + 
@@ -162,8 +177,7 @@ class Sequences:
                 pridict_input_path,
                 "--output-fname batchseqs",
                 config.pridict_output_path
-            ]
-            )
+            ])
         
     def read_pridict_output(self, configuration):
         
