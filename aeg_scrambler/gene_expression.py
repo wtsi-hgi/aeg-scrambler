@@ -124,5 +124,5 @@ class GeneExpression:
                 apply(lambda expression : \
                     0 if expression == "-Inf" else pow(2, expression))
         self.specific_data = \
-            self.specific_data. \
-                drop_duplicates(keep = False, subset = ["Gene_name"])
+            self.specific_data.drop_duplicates(
+                keep = False, subset = ["Gene_name"])

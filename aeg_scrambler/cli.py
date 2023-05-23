@@ -56,6 +56,8 @@ def test(path: Optional[str] = None):
     
     # design
     sequences = Sequences(config, coordinates)
+    
+    #design --export
 
 @app.command()
 def configure_settings(path: Optional[str] = None):

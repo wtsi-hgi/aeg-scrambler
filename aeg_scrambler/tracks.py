@@ -14,12 +14,12 @@ class Tracks:
     
     def assign_track_paths(self):
     
-        self.hic = 
-        self.gene_annotations = 
-        self.regulatory_annotations = 
-        self.preferred_insertion_sites =
-        self.density_convolution = 
-        self.sequence = 
+        self.hic = # Supplied by user
+        self.gene_annotations = # Needs to be generated after metrics
+        self.regulatory_annotations = # Needs to be generated from overlaps
+        self.preferred_insertion_sites = # Exported from coordinates
+        self.density_convolution = # Exported from coordinates
+        self.sequence = # Exported from sequences
     
     def generate_track_config(self):
         
