@@ -126,3 +126,25 @@ class GeneExpression:
         self.specific_data = \
             self.specific_data.drop_duplicates(
                 keep = False, subset = ["Gene_name"])
+            
+    def pickle_gene_expressions(self, config):
+        
+        """
+        Serialises dataframe and saves as file
+        """
+        
+        self.data.to_pickle(
+            config.working_directory +
+            "gene_expressions"
+            )
+    
+    def unpickle_gene_expressions(self, config):
+        
+        """
+        Unserialises dataframe and loads from file
+        """
+        
+        pd.read_pickle(
+            config.working_directory +
+            "gene_expressions"
+        )

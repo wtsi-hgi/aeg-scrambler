@@ -70,3 +70,25 @@ class GeneAnnotations:
             .drop_duplicates(keep = False, subset = ["Gene_name"])
         self.data = self.data \
             .rename(columns = {"Start" : "Gene_start", "End" : "Gene_end"})
+            
+    def pickle_gene_annotations(self, config):
+        
+        """
+        Serialises dataframe and saves as file
+        """
+        
+        self.data.to_pickle(
+            config.working_directory +
+            "gene_annotations"
+            )
+    
+    def unpickle_gene_annotations(self, config):
+        
+        """
+        Unserialises dataframe and loads from file
+        """
+        
+        pd.read_pickle(
+            config.working_directory +
+            "gene_annotations"
+        )

@@ -37,3 +37,25 @@ class RegulatoryAnnotations:
                               .isin(config
                                     .enhancer_epigenetic_flags_of_interest)]
         self.data = self.data.drop(["Flag"], axis = 1)
+        
+    def pickle_regulatory_annotations(self, config):
+        
+        """
+        Serialises dataframe and saves as file
+        """
+        
+        self.data.to_pickle(
+            config.working_directory +
+            "regulatory_annotations"
+            )
+    
+    def unpickle_regulatory_annotations(self, config):
+        
+        """
+        Unserialises dataframe and loads from file
+        """
+        
+        pd.read_pickle(
+            config.working_directory +
+            "regulatory_annotations"
+        )
