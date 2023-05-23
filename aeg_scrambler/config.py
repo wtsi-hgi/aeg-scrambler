@@ -5,13 +5,13 @@ class Config:
     def __init__(self):
     
         self.results_directory = "../results/"
-        self.gene_prioritisation_report_directory = "../results/"
-        self.gene_annotation_reference = ""
-        self.regulatory_elements_reference = ""
-        self.general_expression_by_cell_line_reference_path = ""
-        self.specific_expression_by_cell_line_reference_path = ""
+        self.gene_report_directory = "../results/"
+        self.gene_annotation_path = ""
+        self.regulatory_elements_path = ""
+        self.general_expression_path = ""
+        self.specific_expression_path = ""
         self.hic_path = ""
-        self.reference_genome = ""
+        self.reference_genome_path = ""
         
         self.cell_line_of_interest = "HAP1"
         self.chromosomes_of_interest = \
@@ -19,35 +19,34 @@ class Config:
              "9", "10", "11", "12", "13", "14", "15",
              "16", "17", "18", "19", "20", "21", "22",
              "X", "Y"]
-        self.enhancer_epigenetic_flags_of_interest = ["E11"]
-        self.quiescent_epigenetic_flags_of_interest = ["E8"]
+        self.flags_of_interest = ["E11"]
 
         self.search_type = "whole_gene"
         self.upstream_search = 500000
         self.downstream_search = 500000
 
-        self.std_hard_filter_max = False
-        self.std_hard_filter_min = False
-        self.anomalous_expression_hard_filter_max = False
-        self.anomalous_expression_hard_filter_min = False
-        self.enhancer_count_hard_filter_max = False
-        self.enhancer_count_hard_filter_min = False
-        self.enhancer_proportion_hard_filter_max = False
-        self.enhancer_proportion_hard_filter_min = False
-        self.cell_line_expression_hard_filter_max = False
-        self.cell_line_expression_hard_filter_min = False
-        self.gene_size_hard_filter_max = False
-        self.gene_size_hard_filter_min = False
-        self.symmetry_hard_filter_max = False
-        self.symmetry_hard_filter_min = False
+        self.std_max = False
+        self.std_min = False
+        self.anomalous_expression_max = False
+        self.anomalous_expression_min = False
+        self.enhancer_count_max = False
+        self.enhancer_count_min = False
+        self.enhancer_proportion_max = False
+        self.enhancer_proportion_min = False
+        self.cell_line_expression_max = False
+        self.cell_line_expression_min = False
+        self.gene_size_max = False
+        self.gene_size_min = False
+        self.symmetry_max = False
+        self.symmetry_min = False
 
-        self.relative_std_weight = 1
-        self.relative_anomalous_expression_weight = 1
-        self.relative_enhancer_count_weight = 1
-        self.relative_enhancer_proportion_weight = 1
-        self.relative_cell_line_expression_weight = 1
-        self.relative_gene_size_weight = 1
-        self.relative_symmetry_weight = 1
+        self.std_weight = 1
+        self.anomalous_expression_weight = 1
+        self.enhancer_count_weight = 1
+        self.enhancer_proportion_weight = 1
+        self.cell_line_expression_weight = 1
+        self.gene_size_weight = 1
+        self.symmetry_weight = 1
 
         self.enhancer_kernel_shape = "guassian"
         self.enhancer_kernel_size_type = "relative"
@@ -60,10 +59,10 @@ class Config:
         self.quiescent_kernel_size_type = "relative"
         self.absolute_quiescent_kernel_size = 500
         self.absolute_quiescent_kernel_sigma = 3
-        self.relative_quiescent_kernel_size = 0.15
-        self.relative_quiescent_kernel_sigma = 0.015
+        self.quiescent_kernel_size = 0.15
+        self.quiescent_kernel_sigma = 0.015
 
-        self.cell_line_specific_expression_threshold = 0.01
+        self.specific_expression_threshold = 0.01
         self.interferring_gene_overlaps = False
 
         self.convolution_limit = 2

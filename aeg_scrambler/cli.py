@@ -8,13 +8,13 @@ LICENSE file in the root directory of this source tree.
 import typer
 from typing import Optional
 
-from config import Config
-from gene_annotations import GeneAnnotations
-from gene_expression import GeneExpression
-from regulatory_annotations import RegulatoryAnnotations
-from metrics import Metrics
-from coordinates import Coordinates
-from sequences import Sequences
+from .config import Config
+from .gene_annotations import GeneAnnotations
+from .gene_expression import GeneExpression
+from .regulatory_annotations import RegulatoryAnnotations
+from .metrics import Metrics
+from .coordinates import Coordinates
+from .sequences import Sequences
 
 app = typer.Typer()
 
