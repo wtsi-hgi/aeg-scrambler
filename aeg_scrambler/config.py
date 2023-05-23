@@ -80,7 +80,8 @@ class Config:
 
     def set_config_from_file(self, path) -> None:
         """
-        Reads user-generated config file and changes variables as necessary.
+        Reads user config file, if they supply one, and changes variables as 
+        necessary.
         """
 
         try:

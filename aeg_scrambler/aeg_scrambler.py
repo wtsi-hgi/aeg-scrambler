@@ -17,11 +17,22 @@ class GeneData(ABC):
     separator = "\t"
     
     def __init__(self, filename: Path) -> None:
+        """Initialises genetic data object.
+
+        Args: 
+            filename - path which points to the location of the data.
+        
+        Returns:
+            None.
+        """
+
         self.filename = filename
         self.interesting_chromosomes = [str(c) for c in range(23)] + ['X','Y']
         self.data = self.clean(self.load())
 
     def load(self) -> pd.DataFrame:
+        print("Loading data...")
+
         return pd.read_csv(
             self.filename, 
             names=self.columns, 
@@ -32,8 +43,7 @@ class GeneData(ABC):
     def __repr__(self) -> str:
         return f"""
         Dataframe of type {self.__class__.__name__}, 
-        head:
-        {self.data.head()}"""
+        {self.data}"""
     
     @abstractmethod
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -44,7 +54,6 @@ class GeneralData(GeneData):
     separator = ","
 
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
-        print("cleaning GeneralData")
         return data
     
 
@@ -128,7 +137,7 @@ specificPath = "/specific/path/here"
 generalPath = "/general/path/here"
 annotationPath = "/annotation/path/here"
 
-a = GeneralData(generalPath)
-b = SpecificData(specificPath)
-c = AnnotationData(annotationPath)
-print(a)
+#a = GeneralData(generalPath)
+#b = SpecificData(specificPath)
+#c = AnnotationData(annotationPath)
+#print(a)

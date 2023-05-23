@@ -9,7 +9,7 @@ import typer
 from typing import Optional
 
 from .config import Config
-from .gene_annotations import GeneAnnotations
+from .aeg_scrambler import AnnotationData, SpecificData, GeneralData
 from .gene_expression import GeneExpression
 from .regulatory_annotations import RegulatoryAnnotations
 from .metrics import Metrics
@@ -19,70 +19,37 @@ from .sequences import Sequences
 app = typer.Typer()
 
 @app.command()
-def test(path: Optional[str] = None):
+def test(path = None):
     
     # config --set
-    config = Config()
-    if path:
-        config.set_config_from_file(path)
-    else:
-        config.set_config_from_file("../../config.yaml")
-    
-    # config --view
-    typer.echo("Current settings:")
-    config.print_config()
+    config = Config("config.json")
     
     # rank
-    gene_annotations = GeneAnnotations(config)
-    gene_expressions = GeneExpression(config)
-    regulatory_annotations = RegulatoryAnnotations(config)
-    metrics = Metrics(config,
-                      gene_annotations,
-                      regulatory_annotations,
-                      gene_expressions)
+    
+    #gene_expressions = GeneExpression(config)
+    #regulatory_annotations = RegulatoryAnnotations(config)
+    #metrics = Metrics(config,
+    #                  gene_annotations,
+    #                  regulatory_annotations,
+    #                  gene_expressions)
     
     # rank --tune
     
     # rank --view
     
     # rank --export
-    metrics.export_gene_scores_report(config)
+    #metrics.export_gene_scores_report(config)
     
     # cluster
-    coordinates = Coordinates(config, metrics)
+    #coordinates = Coordinates(config, metrics)
     
     # cluster --export
-    coordinates.export_convolutions(config)
+    #coordinates.export_convolutions(config)
     
     # design
-    sequences = Sequences(config, coordinates)
+    #sequences = Sequences(config, coordinates)
     
     #design --export
-
-@app.command()
-def configure_settings(path: Optional[str] = None):
-    
-    """
-    Looks for and reads config file, then updates user settings.
-    """
-    configuration = Config()
-
-    if path:
-        configuration.set_config_from_file(path)
-    else:
-        configuration.set_config_from_file("../../config.yaml")
-    view_settings()
-
-@app.command()
-def view_settings():
-    
-    """
-    Shows current user settings.
-    """
-
-    configuration = Config()
-    typer.echo("Current settings:")
-    configuration.print_config()
 
 @app.command()
 def rank(configuration):
@@ -146,8 +113,6 @@ def export():
 def main():
     
     app()
-    configuration = Config()
     
-
 if __name__ == "__main__":
     main()
