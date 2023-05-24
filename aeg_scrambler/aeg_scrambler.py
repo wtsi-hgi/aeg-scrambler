@@ -108,36 +108,3 @@ class AnnotationData(GeneData):
         data = data.rename(columns = {"Start" : "Gene_start", "End" : "Gene_end"})
     
         return data
-
-    
-class GeneDataLoader:
-    class Type(enum.Enum):
-        general = enum.auto()
-        specific = enum.auto()
-        annotation = enum.auto()
-        
-    loaders = {
-        Type.general: GeneralData,
-        Type.specific: SpecificData,
-        Type.annotation: AnnotationData
-    }
-
-    def load(self, filename: Path, data_type: Type) -> pd.DataFrame:
-        loader = self.loaders[data_type](filename)
-        return loader.load()
-    
-    
-data_loader = GeneDataLoader()
-
-#a = data_loader.load("a.csv", GeneDataLoader.Type.general)
-#b = data_loader.load("b.csv", GeneDataLoader.Type.specific)
-#c = data_loader.load("c.csv", GeneDataLoader.Type.annotation)    
-
-specificPath = "/specific/path/here"
-generalPath = "/general/path/here"
-annotationPath = "/annotation/path/here"
-
-#a = GeneralData(generalPath)
-#b = SpecificData(specificPath)
-#c = AnnotationData(annotationPath)
-#print(a)
