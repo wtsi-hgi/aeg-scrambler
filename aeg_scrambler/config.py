@@ -5,6 +5,9 @@ class Config:
     def __init__(self, path=None) -> None:
         """Assign default values to configuration variables."""
 
+        #Assign ID
+        self.unique_id = self.assign_unique_id()
+        
         # File paths
         self.results_directory = "../results/"
         self.gene_report_directory = "../results/"
@@ -78,14 +81,10 @@ class Config:
 
         # Load config from file
         self.set_config_from_file(path)
-        
-        #Assign ID
-        self.assign_unique_id()
 
     def set_config_from_file(self, path) -> None:
         """
-        Reads user config file, if they supply one, and changes variables as 
-        necessary.
+        If user supplies a path, reads and changes variables as necessary.
         """
 
         try:
@@ -112,9 +111,8 @@ class Config:
         return config_str
     
     def assign_unique_id(self):
-        
         """
         Generates a unique ID for each dataframe.
         """
         
-        self.unique_id = self.__class__.__name__ + str(hash(self))
+        return self.__class__.__name__ + str(hash(self))
