@@ -47,7 +47,9 @@ class GeneData(ABC):
     
     @abstractmethod
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
-        """Every derived class must implement this"""
+        """
+        Every derived class must implement this
+        """
         pass
 
 class GeneralData(GeneData):

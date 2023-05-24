@@ -29,6 +29,7 @@ class Metrics:
         self.find_nearby_enhancer_densities()
         self.find_symmetry_of_elements()
         self.calculate_interest_score(config)
+        self.assign_unique_id()
         
     def merge_genetic_data(self, gene_annotations, gene_expression):
         
@@ -326,6 +327,14 @@ class Metrics:
         
         #for feature in self.interesting_features:
         #    self.data["Z-" + feature] = stats.zscore(self.data[feature])
+        
+    def assign_unique_id(self):
+        
+        """
+        Generates a unique ID for each dataframe.
+        """
+        
+        self.unique_id = self.__class__.__name__ + str(hash(self.data))
 
     def iterate_through_hard_filters(self, config):
 

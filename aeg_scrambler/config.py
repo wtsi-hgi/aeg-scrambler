@@ -1,4 +1,5 @@
 import json
+import pickle
 
 class Config:
     def __init__(self, path=None) -> None:
@@ -77,6 +78,9 @@ class Config:
 
         # Load config from file
         self.set_config_from_file(path)
+        
+        #Assign ID
+        self.assign_unique_id()
 
     def set_config_from_file(self, path) -> None:
         """
@@ -106,3 +110,11 @@ class Config:
             config_str += f"{key}: {value}\n"
 
         return config_str
+    
+    def assign_unique_id(self):
+        
+        """
+        Generates a unique ID for each dataframe.
+        """
+        
+        self.unique_id = self.__class__.__name__ + str(hash(self))

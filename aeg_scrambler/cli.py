@@ -7,9 +7,10 @@ LICENSE file in the root directory of this source tree.
 
 import typer
 from typing import Optional
+import pickle
 
 from .config import Config
-from .aeg_scrambler import AnnotationData, SpecificData, GeneralData
+from .input_data import InputData
 from .gene_expression import GeneExpression
 from .regulatory_annotations import RegulatoryAnnotations
 from .metrics import Metrics
@@ -17,6 +18,35 @@ from .coordinates import Coordinates
 from .sequences import Sequences
 
 app = typer.Typer()
+working_directory = "working/"
+tracker = []
+
+@app.command()
+def view_tracker():
+    
+    pass
+
+@app.command()
+def set_config(path = None):
+    
+    """
+    Initialises config for program,
+    can read from file otherwise will be set to defaults.
+    """
+    
+    config = Config(path)
+    print("Created new config: " + config.unique_id)
+    pickle_object(config)
+   
+@app.command() 
+def view_config(config_id = None):
+    
+    """
+    Used to view settings of given config.
+    """
+    
+    config = unpickle_object(config_id)
+    print(config)
 
 @app.command()
 def test(path = None):
@@ -108,7 +138,21 @@ def export():
     convolution signal etc as decided by options
     """
 
-    print("Exporting")
+    pass
+    
+def pickle_object(object):
+    
+    with open(working_directory + object.unique_id, "wb") as file:
+        
+        pickle.dump(object, file)
+        
+    tracker = tracker.append(object.unique_id)
+    
+def unpickle_object(object_id):
+    
+    with open(working_directory + object_id, "rb") as file:
+    
+        return pickle.load(file)
 
 def main():
     
