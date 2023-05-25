@@ -8,23 +8,43 @@ LICENSE file in the root directory of this source tree.
 import typer
 from typing import Optional
 import pickle
-
 from .config import Config
-from .input_data import InputData
-from .gene_expression import GeneExpression
-from .regulatory_annotations import RegulatoryAnnotations
+from .input_data import (
+    CCLEExpression,
+    ExperimentalExpression,
+    GeneAnnotations,
+    RegulatoryAnnotations
+)
 from .metrics import Metrics
 from .coordinates import Coordinates
 from .sequences import Sequences
 
 app = typer.Typer()
 working_directory = "working/"
-tracker = []
 
 @app.command()
-def view_tracker():
+def rank(config = None):
     
-    pass
+    """
+    Ranks the genes.
+    """
+    
+    config = Config(config)
+    
+    ccle_expression = CCLEExpression(config)
+    experimental_expression = ExperimentalExpression(config)
+    gene_annotations = GeneAnnotations(config)
+    regulatory_annotations = RegulatoryAnnotations(config)
+    
+    metrics = Metrics(
+        config,
+        gene_annotations,
+        regulatory_annotations,
+        ccle_expression,
+        experimental_expression
+    )
+    
+    metrics.export_gene_scores_report(config)
 
 @app.command()
 def set_config(path = None):
@@ -37,7 +57,7 @@ def set_config(path = None):
     config = Config(path)
     print("Created new config: " + config.unique_id)
     pickle_object(config)
-   
+
 @app.command() 
 def view_config(config_id = None):
     
@@ -48,6 +68,52 @@ def view_config(config_id = None):
     config = unpickle_object(config_id)
     print(config)
 
+@app.command()
+def load_user_data(config_id = None):
+    
+    """
+    Loads in user supplied data as specified in the config file.
+    """
+    
+    config = unpickle_object(config_id)
+    
+    ccle_expression = CCLEExpression(config)
+    experimental_expression = ExperimentalExpression(config)
+    gene_annotations = GeneAnnotations(config)
+    regulatory_annotations = RegulatoryAnnotations(config)
+    
+    pickle_object(ccle_expression)
+    pickle_object(experimental_expression)
+    pickle_object(gene_annotations)
+    pickle_object(regulatory_annotations)
+
+@app.command()
+def generate_metrics(
+    config_id,
+    ccle_expression_id,
+    experimental_expression_id,
+    gene_annotations_id,
+    regulatory_annotations_id
+):
+    
+    """
+    Using entered data, finds various metrics for each
+    gene and ranks them according to weights in table.
+    """
+    config = unpickle_object(config_id)
+    ccle_expression = unpickle_object(ccle_expression_id)
+    experimental_expression = unpickle_object(experimental_expression_id)
+    gene_annotations = unpickle_object(gene_annotations_id)
+    regulatory_annotations = unpickle_object(regulatory_annotations_id)
+    
+    metrics = Metrics(
+        config,
+        gene_annotations,
+        regulatory_annotations,
+        ccle_expression,
+        experimental_expression
+    )
+    
 @app.command()
 def test(path = None):
     
@@ -80,25 +146,6 @@ def test(path = None):
     #sequences = Sequences(config, coordinates)
     
     #design --export
-
-@app.command()
-def rank(configuration):
-    
-    """
-    Prioritises genes based on weights of various factors.
-    """
-    
-    instance_gene_annotations = GeneAnnotations(configuration)
-    instance_gene_expressions = GeneExpression(configuration)
-    instance_regulatory_annotations = RegulatoryAnnotations(configuration)
-
-    instance_metrics = Metrics(
-        configuration,
-        instance_gene_annotations,
-        instance_regulatory_annotations,
-        instance_gene_expressions
-    )
-    instance_metrics.print_metrics()
 
 @app.command()
 def tune(gene, metrics):

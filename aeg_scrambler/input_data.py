@@ -18,24 +18,28 @@ class InputData:
             None.
         """
         
+        self.assign_unique_id()
         self.load(config)
         self.clean(config)
-        self.assign_unique_id()
+        
         
     def __str__(self) -> str:
         
         return f"""Dataframe of type {self.__class__.__name__}, 
         {self.data}"""
     
+    def assign_unique_id(self):
+        
+        """
+        Generates a unique ID for each dataframe.
+        """
+        
+        self.unique_id = self.__class__.__name__ + str(hash(self))
+    
     @abstractmethod
     def load(self, config: Config) -> pd.DataFrame:
 
-        return pd.read_csv(
-            self.filename, 
-            names = self.columns, 
-            skiprows = self.skiprows, 
-            sep = self.separator
-        )
+        pass
     
     @abstractmethod
     def clean(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -46,39 +50,13 @@ class InputData:
         
         pass
     
-    def assign_unique_id(self):
-        
-        """
-        Generates a unique ID for each dataframe.
-        """
-        
-        self.unique_id = self.__class__.__name__ + str(hash(self.data))
-    
-    def pickle_dataframe(self, config):
-        
-        """
-        Serialises dataframe and saves as file.
-        """
-        
-        self.data.to_pickle(
-            config.working_directory +
-            self.unique_id
-        )
-    
-    def unpickle_dataframe(self, config):
-        
-        """
-        Unserialises dataframe and loads from file.
-        """
-        
-        pd.read_pickle(
-            config.working_directory +
-            self.unique_id
-        )
-    
 class CCLEExpression(InputData):
     
-    separator = ","
+    def load(self, config: Config) -> pd.DataFrame:
+        
+        self.data = pd.read_csv(
+            config.ccle_expression_path
+        ).transpose() 
 
     def clean(self, config: Config) -> pd.DataFrame:
         
@@ -117,10 +95,55 @@ class CCLEExpression(InputData):
             subset = ["Gene_name"],
             inplace = True
         )
+        
+    def find_mean(self):
+        
+        """
+        Adds the mean of gene expression to the given expression data frame,
+        giving a mean for each gene
+        """
+
+        self.data["Mean"] = self.data.loc[
+            :, self.data.columns != "Gene_name"
+        ].mean(axis = 1)
+        
+    def find_std(self):
+        
+        """
+        Adds the standard deviation to the given expression dataframe, giving
+        the standard deviation across expression of each gene in all provided
+        cell types
+        """
+
+        self.data["Std"] = self.data.loc[
+            :, self.data.columns != "Gene_name"
+        ].std(axis = 1)
+    
+    def find_anomalous_score_of_gene_expression(self):
+    
+        """
+        Adds the z-score of each gene based on its expression
+        in the cell line of interest compared to all others
+        """
+        
+        self.data["Anomalous_score"] = self.data.apply(
+            lambda gene : (gene["General_gene_expression"] - 
+                           gene["Mean"]) / gene["Std"],
+            axis = 1
+        )
 
 class ExperimentalExpression(InputData):
+    
+    def load(self, config):
         
-    def clean(self):
+        self.data = pd.read_csv(
+            config.experimental_expression_path,
+            sep = "\t",
+            names = ["Gene_name", "Specific_gene_expression"],
+            skiprows = 1
+        )  
+       
+    def clean(self, _):
 
         """
         Cleans the expression data specific to the cell line of interest by
@@ -128,9 +151,10 @@ class ExperimentalExpression(InputData):
         of negative infinity, duplicate genes are dropped
         """
         
-        self.data["Specific_gene_expression"] = \
-            self.data["Specific_gene_expression"].apply(lambda expression :
-                0 if expression == "-Inf" else pow(2, expression))
+        self.data["Specific_gene_expression"] = self.data[
+            "Specific_gene_expression"
+        ].apply(lambda expression :
+            0 if expression == "-Inf" else pow(2, expression))
                 
         self.data.drop_duplicates(
             keep = False,
@@ -139,6 +163,34 @@ class ExperimentalExpression(InputData):
         )
         
 class GeneAnnotations(InputData):
+    
+    def load(self, config):
+        
+        self.data = pd.read_csv(
+            config.gene_annotation_path,
+            sep = "\t",
+            names = [
+                "Chromosome",
+                "Source",
+                "Type",
+                "Start",
+                "End",
+                "Score",
+                "Strand",
+                "Phase",
+                "Attributes"],
+            skiprows = 5,
+            dtype = {
+                "Chromosome" : str,
+                "Source" : str,
+                "Type" : str,
+                "Start" : int,
+                "End" : int,
+                "Score" : str,
+                "Strand" : str,
+                "Phase" : str,
+                "Attributes" : str
+        })
     
     def clean(self, config):
     
@@ -185,6 +237,14 @@ class GeneAnnotations(InputData):
         
 class RegulatoryAnnotations(InputData):
     
+    def load(self, config):
+        
+        self.data = pd.read_csv(
+            config.regulatory_elements_path,
+            sep = "\t",
+            names = ["Chromosome", "Start", "End", "Flag"]
+        )
+    
     def clean(self, config):
         
         """
@@ -196,6 +256,6 @@ class RegulatoryAnnotations(InputData):
         )
         self.data = self.data[
             self.data["Flag"].isin(
-                config.enhancer_epigenetic_flags_of_interest
+                config.flags_of_interest
         )]
         self.data.drop(["Flag"], axis = 1, inplace = True)

@@ -1,5 +1,6 @@
 import json
 import pickle
+import hashlib
 
 class Config:
     def __init__(self, path=None) -> None:
@@ -13,12 +14,12 @@ class Config:
         self.gene_report_directory = "../results/"
         self.gene_annotation_path = ""
         self.regulatory_elements_path = ""
-        self.general_expression_path = ""
-        self.specific_expression_path = ""
+        self.ccle_expression_path = ""
+        self.experimental_expression_path = ""
         self.hic_path = ""
         self.reference_genome_path = ""
 
-        # General settings
+        # Experimental specific settings
         self.cell_line_of_interest = "HAP1"
         self.chromosomes_of_interest = [str(i) for i in range(23)] + ['X','Y']
         self.flags_of_interest = ["E11"]
@@ -69,13 +70,17 @@ class Config:
         self.relative_quiescent_kernel_size = 0.15
         self.relative_quiescent_kernel_sigma = 0.015
 
-        # Other settings
+        # Interferring gene settings
         self.specific_expression_threshold = 0.01
         self.interferring_gene_overlaps = False
+        
+        # Convolution settings
         self.convolution_limit = 2
         self.enhancer_convolution_weight = 1
         self.quiescent_convolution_weight = 1
         self.plateau_threshold = 0.1
+        
+        # Sequence inserting settings
         self.inserted_sequence = "ATAACTTCGTATAATGTACATTATACGAAGTTAT"
         self.partial_insertion_per_region = 100
 

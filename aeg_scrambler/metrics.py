@@ -6,12 +6,16 @@ from sklearn.preprocessing import StandardScaler
 
 class Metrics:
     
-    def __init__(self,
-                 config,
-                 gene_annotations,
-                 regulatory_element_annotations,
-                 gene_expression):
+    def __init__(
+        self,
+        config,
+        gene_annotations,
+        regulatory_element_annotations,
+        ccle_expression,
+        experimental_expression
+    ):
         
+        self.assign_unique_id()
         self.interesting_features = ["Std",
                                      "Anomalous_score",
                                      "Enhancer_count",
@@ -20,7 +24,11 @@ class Metrics:
                                      "Gene_size",
                                      "Symmetry_ratio"]
         self.regulatory_data = regulatory_element_annotations.data
-        self.merge_genetic_data(gene_annotations, gene_expression)
+        self.merge_genetic_data(
+            gene_annotations,
+            ccle_expression,
+            experimental_expression
+        )
         self.find_gene_sizes()
         self.find_interferring_genes(config)
         self.find_search_windows(config)
@@ -29,16 +37,25 @@ class Metrics:
         self.find_nearby_enhancer_densities()
         self.find_symmetry_of_elements()
         self.calculate_interest_score(config)
-        self.assign_unique_id()
         
-    def merge_genetic_data(self, gene_annotations, gene_expression):
+    def merge_genetic_data(
+        self, gene_annotations,
+        ccle_expression,
+        experimental_expression
+    ):
         
-        self.data = pd.merge(gene_annotations.data,
-                         gene_expression.general_data,
-                         on = "Gene_name", how = "inner")
-        self.data = pd.merge(self.data,
-                         gene_expression.specific_data,
-                         on = "Gene_name", how = "inner") 
+        self.data = pd.merge(
+            gene_annotations.data,
+            ccle_expression.data,
+            on = "Gene_name",
+            how = "inner"
+        )
+        self.data = pd.merge(
+            self.data,
+            experimental_expression.data,
+            on = "Gene_name",
+            how = "inner"
+        ) 
         
     def find_gene_sizes(self):
         
@@ -63,7 +80,7 @@ class Metrics:
         
         interferring_genes_search = pr.PyRanges(
             self.data.loc[self.data["Specific_gene_expression"] > \
-                config.cell_line_specific_expression_threshold])
+                config.specific_expression_threshold])
         
         gene_search = pr.PyRanges(self.data)
         genes_nearest_upstream_pr = gene_search.nearest(
@@ -272,21 +289,21 @@ class Metrics:
         scaled_genes = scaled_genes.assign(
             Interest_score = (
                 scaled_genes["Std"] * \
-                    config.relative_std_weight +
+                    config.std_weight +
                 scaled_genes["Anomalous_score"] * \
-                    config.relative_anomalous_expression_weight +
+                    config.anomalous_expression_weight +
                 scaled_genes["Enhancer_count"] * \
-                    config.relative_enhancer_count_weight +
+                    config.enhancer_count_weight +
                 scaled_genes["Enhancer_proportion"] * \
-                    config.relative_enhancer_proportion_weight +
+                    config.enhancer_proportion_weight +
                 scaled_genes["Specific_gene_expression"] * \
-                    config.relative_cell_line_expression_weight +
-                (config.relative_gene_size_weight * \
+                    config.cell_line_expression_weight +
+                (config.gene_size_weight * \
                     pow((2), (-scaled_genes["Gene_size"] * \
-                        config.relative_gene_size_weight * \
-                            config.relative_gene_size_weight))) +
+                        config.gene_size_weight * \
+                            config.gene_size_weight))) +
                 scaled_genes["Symmetry_ratio"] * \
-                    config.relative_symmetry_weight
+                    config.symmetry_weight
             )
         ).sort_values("Interest_score", ascending=False)
         
@@ -334,7 +351,7 @@ class Metrics:
         Generates a unique ID for each dataframe.
         """
         
-        self.unique_id = self.__class__.__name__ + str(hash(self.data))
+        self.unique_id = self.__class__.__name__ + str(hash(self))
 
     def iterate_through_hard_filters(self, config):
 
@@ -343,23 +360,23 @@ class Metrics:
         """
         
         max_filters = [
-            config.std_hard_filter_max, 
-            config.anomalous_expression_hard_filter_max, 
-            config.enhancer_count_hard_filter_max, 
-            config.enhancer_proportion_hard_filter_max, 
-            config.cell_line_expression_hard_filter_max, 
-            config.gene_size_hard_filter_max,
-            config.symmetry_hard_filter_max
+            config.std_max, 
+            config.anomalous_expression_max, 
+            config.enhancer_count_max, 
+            config.enhancer_proportion_max, 
+            config.cell_line_expression_max, 
+            config.gene_size_max,
+            config.symmetry_max
         ]
         
         min_filters = [
-            config.std_hard_filter_min, 
-            config.anomalous_expression_hard_filter_min, 
-            config.enhancer_count_hard_filter_min, 
-            config.enhancer_proportion_hard_filter_min, 
-            config.cell_line_expression_hard_filter_min, 
-            config.gene_size_hard_filter_min,
-            config.symmetry_hard_filter_min
+            config.std_min, 
+            config.anomalous_expression_min, 
+            config.enhancer_count_min, 
+            config.enhancer_proportion_min, 
+            config.cell_line_expression_min, 
+            config.gene_size_min,
+            config.symmetry_min
         ]
         
         for feature in self.interesting_features:
@@ -405,18 +422,19 @@ class Metrics:
         different configs. Report saved in given location.
         """
         
-        checksum = config.generate_config_checksum()
-        report_path = config.gene_prioritisation_report_directory + \
-            "gene_rankings_" + checksum[:8] + ".txt"
+        id = config.unique_id
+        report_path = config.gene_report_directory + \
+            "gene_rankings_" + id[:8] + ".txt"
         
         
         with open(report_path, "w") as report:
 
             current_config = vars(config)
-            report.write("\n"
-                         .join("%s: %s" % setting for 
-                               setting in
-                               current_config.items()))
+            report.write(
+                "\n".join("%s: %s" % setting for
+                          setting in
+                          current_config.items()
+                        ))
             self.data.loc[:, (["Gene_name"] +
                             ["Interest_score"] + 
                             self.interesting_features +
