@@ -100,7 +100,7 @@ class Config:
     
     def __str__(self) -> str:
         """
-        Returns a string representation of the current configuration.
+        Returns a string representation of the config object.
         """
 
         current_config = vars(self)
@@ -116,3 +116,38 @@ class Config:
         """
         
         return self.__class__.__name__ + str(hash(self))
+    
+    def get_weights(self) -> list:
+        """
+        Returns the weights associated with the config object.
+        """
+        
+        return [
+            self.std_weight,
+            self.anomalous_expression_weight,
+            self.enhancer_count_weight,
+            self.enhancer_proportion_weight,
+            self.cell_line_expression_weight,
+            self.gene_size_weight,
+            self.symmetry_weight
+        ]
+    
+    def get_filters(self) -> list:
+        """Returns the filters associated with the config object."""
+    
+        return [
+            self.std_max,
+            self.std_min,
+            self.anomalous_expression_max,
+            self.anomalous_expression_min,
+            self.enhancer_count_max,
+            self.enhancer_count_min,
+            self.enhancer_proportion_max,
+            self.enhancer_proportion_min,
+            self.cell_line_expression_max,
+            self.cell_line_expression_min,
+            self.gene_size_max,
+            self.gene_size_min,
+            self.symmetry_max,
+            self.symmetry_min,
+        ]
