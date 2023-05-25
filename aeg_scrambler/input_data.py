@@ -136,7 +136,7 @@ class ExperimentalExpression(InputData):
             keep = False,
             subset = ["Gene_name"],
             inplace = True
-            )
+        )
         
 class GeneAnnotations(InputData):
     
@@ -152,14 +152,14 @@ class GeneAnnotations(InputData):
         self.data.drop(
             self.data[self.data["Type"] != "gene"].index,
             inplace = True
-            )
+        )
         self.data["Gene_biotype"] = self.data["Attributes"]\
             .apply(lambda x : re.findall("gene_biotype \"(.*?)\"", x)[0] if \
                 re.search("gene_name \"(.*?)\"", x) != None else "None")
         self.data.drop(
             self.data[self.data["Gene_biotype"] != "protein_coding"].index,
             inplace = True
-            )
+        )
         self.data["Gene_name"] = self.data["Attributes"]\
             .apply(lambda x : re.findall("gene_name \"(.*?)\"", x)[0] if\
                 re.search("gene_name \"(.*?)\"", x) != None else "None")
@@ -177,8 +177,25 @@ class GeneAnnotations(InputData):
             keep = False,
             subset = ["Gene_name"],
             inplace = True
-            )
+        )
         self.data.rename(
             columns = {"Start" : "Gene_start", "End" : "Gene_end"},
             inplace = True
-            )
+        )
+        
+class RegulatoryAnnotations(InputData):
+    
+    def clean(self, config):
+        
+        """
+        Put regulatory data into correct format and remove unecessary data
+        """
+            
+        self.data["Chromosome"] = self.data["Chromosome"].apply(
+            lambda x : x[3:]
+        )
+        self.data = self.data[
+            self.data["Flag"].isin(
+                config.enhancer_epigenetic_flags_of_interest
+        )]
+        self.data.drop(["Flag"], axis = 1, inplace = True)
