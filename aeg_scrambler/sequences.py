@@ -6,12 +6,21 @@ import subprocess
 class Sequences:
     
     def __init__(self, config, coordinates):
-        """"""
+
+
+        self.plateau_insertions = pd.DataFrame(columns = ["Sequence_name",
+                                                      "Insertion_sequence",
+                                                      "Insertion_location",
+                                                      "Plateau_sequence"])
+        self.inserted_sequence = config.inserted_sequence
+        self.partial_insertions_per_region = \
+            config.partial_insertions_per_region
         self.data = coordinates.data
         self.initialise_plateau_insertions()
         self.iterate_gene_plateaus(config)
         
     def initialise_plateau_insertions(self):
+        
         """
         Creates empty dataframe ready to accept further inputs.
         """
@@ -25,6 +34,7 @@ class Sequences:
             ])
         
     def iterate_gene_plateaus(self, config):
+        
         """
         Saves plateaus associated with each gene as a bed file.
         """
@@ -46,6 +56,7 @@ class Sequences:
             self.generate_pridict_input(config)
         
     def find_fasta(self, config):
+        
         """
         Takes coordinates of plateaus and returns FASTA
         sequence from reference genome
@@ -53,12 +64,13 @@ class Sequences:
         
         plateaus_pr = pr.PyRanges(self.plateaus)
         
-        seq = pr.get_sequence(plateaus_pr, config.reference_genome)
+        seq = pr.get_sequence(plateaus_pr, config.reference_genome_path)
         plateaus_pr.seq = seq
         self.plateaus = plateaus_pr.df
         self.plateaus.rename(columns = {"seq" : "Sequence"}, inplace = True)
 
     def generate_pridict_input(self, config):
+        
         """
         For each plateau, finds partial insertion sites, 
         exports sequences with insertions to csv
@@ -66,7 +78,6 @@ class Sequences:
         
         self.plateaus.apply(
             self.generate_insertion_prefixes_and_suffixes,
-            args = (config),
             axis = 1,
         )
         
@@ -81,7 +92,8 @@ class Sequences:
             mode = "w", header = False
         )
 
-    def generate_insertion_prefixes_and_suffixes(self, plateau, config):
+    def generate_insertion_prefixes_and_suffixes(self, plateau):
+        
         """
         Iteratively finds all possible partial insertions in order of length.
         """
@@ -94,16 +106,16 @@ class Sequences:
                 "Plateau_sequence"
             ])
         
-        for num_bases_absent in range(0, len(config.inserted_sequence)):
+        for num_bases_absent in range(0, len(self.inserted_sequence)):
             for checked_position in range(
-                0, (len(config.inserted_sequence) - num_bases_absent)):
+                0, (len(self.inserted_sequence) - num_bases_absent)):
 
-                absent_sequence = config.inserted_sequence[
+                absent_sequence = self.inserted_sequence[
                     checked_position : (checked_position + num_bases_absent)
                 ]
                 present_sequence = (
-                    config.inserted_sequence[:checked_position] 
-                    + config.inserted_sequence[
+                    self.inserted_sequence[:checked_position] 
+                    + self.inserted_sequence[
                         (checked_position + num_bases_absent):
                     ]
                 )
@@ -131,15 +143,17 @@ class Sequences:
                         axis = 0, ignore_index = True
                     )
                     
-                    if len(plateau_insertion_sites.index) > config.partial_insertions_per_region:
-                        plateau_insertions = pd.concat(
-                            [plateau_insertions, plateau_insertion_sites], 
+                    if len(plateau_insertion_sites.index) > self.partial_insertions_per_region:
+                        
+                        self.plateau_insertions = pd.concat(
+                            [self.plateau_insertions, plateau_insertion_sites], 
                             axis = 0, ignore_index = True
                         )
 
                         break
         
-    def find_prefix_suffix_in_plateau(plateau, present_sequence):
+    def find_prefix_suffix_in_plateau(self, plateau, present_sequence):
+        
         """
         Searches plateau sequences for partial insertion sequences
         """
@@ -152,19 +166,21 @@ class Sequences:
         
         return insertion_positions
     
-    def insert_insertion_sequence(row):
+    def insert_insertion_sequence(self, row):
+        
         """
         Adds missing insertion sequence into partial insertions
         found in plateaus
         """
         
-        return (
+        return str(
             row["Plateau_sequence"][:row["Insertion_location"]] + 
             "(+" + row["Insertion_sequence"] + ")" + 
             row["Plateau_sequence"][row["Insertion_location"]:]
         )
         
     def run_pridict(config, pridict_input_path):
+        
         subprocess.run([
             "python",
             "pridict_pegRNA_design.py",
@@ -176,9 +192,11 @@ class Sequences:
         ])
         
     def read_pridict_output(self, configuration):
+        
         self.output = pd.read_csv(configuration.pridict_output_path)
         
     def clean_pridict_output(self):
+        
         self.output = self.output.drop([["Original_sequences",
                                          "Edited_sequences"]],
                                        axis = 1)

@@ -82,7 +82,7 @@ class Config:
         
         # Sequence inserting settings
         self.inserted_sequence = "ATAACTTCGTATAATGTACATTATACGAAGTTAT"
-        self.partial_insertion_per_region = 100
+        self.partial_insertions_per_region = 100
 
         # Load config from file
         self.set_config_from_file(path)

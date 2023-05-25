@@ -43,8 +43,33 @@ def rank(config = None):
         ccle_expression,
         experimental_expression
     )
-    
+    print(metrics.data)
     metrics.export_gene_scores_report(config)
+
+@app.command()
+def design(config = None):
+    
+    """
+    
+    """
+    
+    config = Config(config)
+    
+    ccle_expression = CCLEExpression(config)
+    experimental_expression = ExperimentalExpression(config)
+    gene_annotations = GeneAnnotations(config)
+    regulatory_annotations = RegulatoryAnnotations(config)
+    
+    metrics = Metrics(
+        config,
+        gene_annotations,
+        regulatory_annotations,
+        ccle_expression,
+        experimental_expression
+    )
+    
+    coordinates = Coordinates(config, metrics)
+    sequences = Sequences(config, coordinates)
 
 @app.command()
 def set_config(path = None):
@@ -113,22 +138,13 @@ def generate_metrics(
         ccle_expression,
         experimental_expression
     )
+   
     
 @app.command()
 def test(path = None):
     
-    # config --set
-    config = Config("config.json")
-    
-    # rank
-    
-    #gene_expressions = GeneExpression(config)
-    #regulatory_annotations = RegulatoryAnnotations(config)
-    #metrics = Metrics(config,
-    #                  gene_annotations,
-    #                  regulatory_annotations,
-    #                  gene_expressions)
-    
+    pass
+
     # rank --tune
     
     # rank --view
@@ -153,18 +169,6 @@ def tune(gene, metrics):
     Tune the weights to find the local maxima rank of a specific gene
     """
     pass
-
-@app.command()
-def design(configuration, metrics):
-    
-    """
-    Taking a list of ranked genes, will design pegRNA sequences for the 
-    regions between enhancers and call PRIDICT to find the most efficient
-    in each inter-enhancer sequence
-    """
-    
-    coordinates = Coordinates(configuration, metrics)
-    sequences = Sequences(configuration, coordinates)
 
 @app.command()
 def explore():
