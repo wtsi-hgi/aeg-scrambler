@@ -305,7 +305,7 @@ class Metrics:
                 scaled_genes["Symmetry_ratio"] * \
                     config.symmetry_weight
             )
-        ).sort_values("Interest_score", ascending=False)
+        ).sort_values("Interest_score", ascending = False)
         
         scaled_genes = scaled_genes.rename(
             columns = {
@@ -424,35 +424,31 @@ class Metrics:
         
         id = config.unique_id
         report_path = config.gene_report_directory + \
-            "gene_rankings_" + id[:8] + ".txt"
+            "gene_rankings_" + id[:14] + ".txt"
         
         
         with open(report_path, "w") as report:
 
-            current_config = vars(config)
-            report.write(
-                "\n".join("%s: %s" % setting for
-                          setting in
-                          current_config.items()
-                        ))
-            self.data.loc[:, (["Gene_name"] +
-                            ["Interest_score"] + 
-                            self.interesting_features +
-                            ["Scaled_std",
-                            "Scaled_anomalous_score",
-                            "Scaled_enhancer_count",
-                            "Scaled_enhancer_proportion",
-                            "Scaled_specific_gene_expression",
-                            "Scaled_gene_size",
-                            "Scaled_symmetry_ratio",
-                            #"Z-Std",
-                            #"Z-Anomalous_score",
-                            #"Z-Enhancer_count",
-                            #"Z-Enhancer_proportion",
-                            #"Z-Specific_gene_expression",
-                            #"Z-Gene_size",
-                            #"Z-Symmetry_ratio"
-                            ])].to_csv(report_path,
-                                       sep = "\t",
-                                       index = True,
-                                       mode = "a")
+            report.write(config.__str__())
+            
+        self.data.loc[:, (["Gene_name"] +
+                        ["Interest_score"] + 
+                        self.interesting_features +
+                        ["Scaled_std",
+                        "Scaled_anomalous_score",
+                        "Scaled_enhancer_count",
+                        "Scaled_enhancer_proportion",
+                        "Scaled_specific_gene_expression",
+                        "Scaled_gene_size",
+                        "Scaled_symmetry_ratio",
+                        #"Z-Std",
+                        #"Z-Anomalous_score",
+                        #"Z-Enhancer_count",
+                        #"Z-Enhancer_proportion",
+                        #"Z-Specific_gene_expression",
+                        #"Z-Gene_size",
+                        #"Z-Symmetry_ratio"
+                        ])].to_csv(report_path,
+                                    sep = "\t",
+                                    index = True,
+                                    mode = "a")
