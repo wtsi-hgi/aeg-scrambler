@@ -1,5 +1,25 @@
 # AEG SCRAMBLEr
 
+## How to install
+
+## Configuration
+
+## Commands
+
+### Rank
+
+The rank command can be used to produce a list of genes selected in order of
+weighted features, a tsv file will be created at the desired location with the
+full list of genes and the top 50 will be printed to the terminal.
+
+Example Rank command:
+
+~~~
+aeg-scrambler rank --config /my/path/to/config.json
+~~~
+
+### Design
+
 
 [![pypi](https://img.shields.io/pypi/v/aeg-scrambler.svg)](https://pypi.org/project/aeg-scrambler/)
 [![python](https://img.shields.io/pypi/pyversions/aeg-scrambler.svg)](https://pypi.org/project/aeg-scrambler/)

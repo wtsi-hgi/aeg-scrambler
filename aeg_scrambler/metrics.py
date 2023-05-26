@@ -412,11 +412,20 @@ class Metrics:
         else: 
             print("ERROR : Could not identify minmax.")
 
+    def printable_ranks(self):
+        
+        """
+        Returns a dataframe with only the important columns
+        """
+        
+        return self.data.loc[
+            :, (["Gene_name"] + self.interesting_features)
+        ].head(50)
+        
+
     def export_gene_scores_report(self, config):
         
         """
-        Not ready for use
-        
         Md5 checksum of config file is generated. Gene prioritisation report
         file is created and checksum is included in name to differentiate
         different configs. Report saved in given location.
@@ -427,7 +436,11 @@ class Metrics:
         
         id = config.unique_id[:14]
         report_path = config.gene_report_directory + \
+<<<<<<< Updated upstream
             "gene_rankings_" + id + ".txt"
+=======
+            "gene_rankings_" + id[6:14] + ".txt"
+>>>>>>> Stashed changes
         
         
         with open(report_path, "w") as report:

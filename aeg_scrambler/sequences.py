@@ -18,6 +18,7 @@ class Sequences:
         self.data = coordinates.data
         self.initialise_plateau_insertions()
         self.iterate_gene_plateaus(config)
+        self.run_pridict(config)
         
     def initialise_plateau_insertions(self):
         
@@ -179,16 +180,32 @@ class Sequences:
             row["Plateau_sequence"][row["Insertion_location"]:]
         )
         
-    def run_pridict(config, pridict_input_path):
+    def run_pridict(self, config):
+        
+        #subprocess.run([
+        #    "python",
+        #    "pridict_pegRNA_design.py",
+        #    "batch",
+        #    "--input-fname",
+        #    pridict_input_path,
+        #    "--output-fname batchseqs",
+        #    config.pridict_output_path
+        #])
         
         subprocess.run([
-            "python",
-            "pridict_pegRNA_design.py",
+            
+            "singularity",
+            "exec",
+            "--bind",
+            "/lustre",
+            config.pridict_image_path,
+            config.pridict_path,
             "batch",
             "--input-fname",
-            pridict_input_path,
-            "--output-fname batchseqs",
+            config.results_directory + "sequences_for_pridict.csv",
+            "--output-fname",
             config.pridict_output_path
+            
         ])
         
     def read_pridict_output(self, configuration):

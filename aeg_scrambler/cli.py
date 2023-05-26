@@ -43,7 +43,7 @@ def rank(config = None):
         ccle_expression,
         experimental_expression
     )
-    print(metrics.data)
+    print(metrics.printable_ranks())
     metrics.export_gene_scores_report(config)
 
 @app.command()
