@@ -420,11 +420,14 @@ class Metrics:
         Md5 checksum of config file is generated. Gene prioritisation report
         file is created and checksum is included in name to differentiate
         different configs. Report saved in given location.
+
+        Please note that if you wish to read this file, with pd.read_csv(), 
+        then you will need to pass skiprows=56.
         """
         
-        id = config.unique_id
+        id = config.unique_id[:14]
         report_path = config.gene_report_directory + \
-            "gene_rankings_" + id[:14] + ".txt"
+            "gene_rankings_" + id + ".txt"
         
         
         with open(report_path, "w") as report:
