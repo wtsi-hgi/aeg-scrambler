@@ -1,52 +1,60 @@
 import json
+import pickle
+import hashlib
 
 class Config:
-    
-    def __init__(self, path):
-        self.results_directory = "../results/"
-        self.gene_prioritisation_report_directory = "../results/"
-        self.gene_annotation_reference = ""
-        self.regulatory_elements_reference = ""
-        self.general_expression_by_cell_line_reference_path = ""
-        self.specific_expression_by_cell_line_reference_path = ""
-        self.reference_genome = ""
+    def __init__(self, path=None) -> None:
+        """Assign default values to configuration variables."""
+
+        #Assign ID
+        self.unique_id = self.assign_unique_id()
         
+        # File paths
+        self.results_directory = "../results/"
+        self.gene_report_directory = "../results/"
+        self.gene_annotation_path = ""
+        self.regulatory_elements_path = ""
+        self.ccle_expression_path = ""
+        self.experimental_expression_path = ""
+        self.hic_path = ""
+        self.reference_genome_path = ""
+
+        # Experimental specific settings
         self.cell_line_of_interest = "HAP1"
         self.chromosomes_of_interest = [str(i) for i in range(23)] + ['X','Y']
-        self.enhancer_epigenetic_flags_of_interest = ["E11"]
-        self.quiescent_epigenetic_flags_of_interest = ["E8"]
+        self.flags_of_interest = ["E11"]
 
+        # Search settings
         self.search_type = "whole_gene"
-        self.upstream_search, self.downstream_search = 500000, 500000
+        self.upstream_search = 500000
+        self.downstream_search = 500000
 
-        self.std_hard_filter_max, self.std_hard_filter_min = False, False
-        
-        self.anomalous_expression_hard_filter_max,
-        self.anomalous_expression_hard_filter_min = False, False
+        # Filters
+        self.std_max = False
+        self.std_min = False
+        self.anomalous_expression_max = False
+        self.anomalous_expression_min = False
+        self.enhancer_count_max = False
+        self.enhancer_count_min = False
+        self.enhancer_proportion_max = False
+        self.enhancer_proportion_min = False
+        self.cell_line_expression_max = False
+        self.cell_line_expression_min = False
+        self.gene_size_max = False
+        self.gene_size_min = False
+        self.symmetry_max = False
+        self.symmetry_min = False
 
-        self.enhancer_count_hard_filter_max,
-        self.enhancer_count_hard_filter_min = False, False
+        # Weights
+        self.std_weight = 1
+        self.anomalous_expression_weight = 1
+        self.enhancer_count_weight = 1
+        self.enhancer_proportion_weight = 1
+        self.cell_line_expression_weight = 1
+        self.gene_size_weight = 1
+        self.symmetry_weight = 1
 
-        self.enhancer_proportion_hard_filter_max,
-        self.enhancer_proportion_hard_filter_min = False, False
-
-        self.cell_line_expression_hard_filter_max,
-        self.cell_line_expression_hard_filter_min = False, False
-        
-        self.gene_size_hard_filter_max,
-        self.gene_size_hard_filter_min = False, False
-
-        self.symmetry_hard_filter_max,
-        self.symmetry_hard_filter_min = False, False
-
-        self.relative_std_weight = 1
-        self.relative_anomalous_expression_weight = 1
-        self.relative_enhancer_count_weight = 1
-        self.relative_enhancer_proportion_weight = 1
-        self.relative_cell_line_expression_weight = 1
-        self.relative_gene_size_weight = 1
-        self.relative_symmetry_weight = 1
-
+        # Enhancer kernel
         self.enhancer_kernel_shape = "guassian"
         self.enhancer_kernel_size_type = "relative"
         self.absolute_enhancer_kernel_size = 500
@@ -54,6 +62,7 @@ class Config:
         self.relative_enhancer_kernel_size = 0.15
         self.relative_enhancer_kernel_sigma = 0.005
 
+        # Quiescent kernel
         self.quiescent_kernel_shape = "guassian"
         self.quiescent_kernel_size_type = "relative"
         self.absolute_quiescent_kernel_size = 500
@@ -61,171 +70,94 @@ class Config:
         self.relative_quiescent_kernel_size = 0.15
         self.relative_quiescent_kernel_sigma = 0.015
 
-        self.cell_line_specific_expression_threshold = 0.01
+        # Interferring gene settings
+        self.specific_expression_threshold = 0.01
         self.interferring_gene_overlaps = False
-
+        
+        # Convolution settings
         self.convolution_limit = 2
         self.enhancer_convolution_weight = 1
         self.quiescent_convolution_weight = 1
         self.plateau_threshold = 0.1
-
+        
+        # Sequence inserting settings
         self.inserted_sequence = "ATAACTTCGTATAATGTACATTATACGAAGTTAT"
-        self.partial_insertion_per_region = 100
+        self.partial_insertions_per_region = 100
         
+        #Temporary Pridict paths
+        self.pridict_image_path = ""
+        self.pridict_path = ""
+        self.pridict_output_path = ""
+
+        # Load config from file
         self.set_config_from_file(path)
-        
-    def set_config_from_file(self, path):
+
+    def set_config_from_file(self, path) -> None:
         """
-        Reads user generated config file and changes variables as necessary
-        """    
+        If user supplies a path, reads and changes variables as necessary.
+        """
+
         try:
-            with open(path, "r") as config_file:    
+            with open(path, "r") as config_file:
                 settings = json.load(config_file)
-                
-                self.results_directory = settings["results_directory"]
-                self.gene_prioritisation_report_directory = settings[
-                    "gene_prioritisation_report_directory"
-                ]
-                self.gene_annotation_reference = settings[
-                    "gene_annotation_reference"
-                ]
-                self.regulatory_elements_reference = settings[
-                    "regulatory_elements_reference"
-                ]
-                self.general_expression_by_cell_line_reference_path = settings[
-                    "general_expression_by_cell_line_reference_path"
-                ]
-                self.specific_expression_by_cell_line_reference_path = settings[
-                    "specific_expression_by_cell_line_reference_path"
-                ]
-                self.reference_genome = settings["reference_genome"]
-
-                self.cell_line_of_interest = settings[
-                    "cell_line_of_interest"
-                ]
-                self.chromosomes_of_interest = settings[
-                    "chromosomes_of_interest"
-                ]
-                self.enhancer_epigenetic_flags_of_interest = settings[
-                    "enhancer_epigenetic_flags_of_interest"
-                    ]
-                self.quiescent_epigenetic_flags_of_interest = settings[
-                    "quiescent_epigenetic_flags_of_interest"
-                ]
-
-                self.search_type = settings["search_type"]
-                self.upstream_search = settings["upstream_search"]
-                self.downstream_search = settings["downstream_search"]
-
-                self.std_hard_filter_max = settings["std_hard_filter_max"]
-                self.std_hard_filter_min = settings["std_hard_filter_min"]
-                self.anomalous_expression_hard_filter_max = settings[
-                    "anomalous_expression_hard_filter_max"
-                ]
-                self.anomalous_expression_hard_filter_min = settings[
-                    "anomalous_expression_hard_filter_min"
-                ]
-                self.enhancer_count_hard_filter_max = settings[
-                    "enhancer_count_hard_filter_max"
-                ]
-                self.enhancer_count_hard_filter_min = settings[
-                    "enhancer_count_hard_filter_min"
-                ]
-                self.enhancer_proportion_hard_filter_max = settings[
-                    "enhancer_proportion_hard_filter_max"
-                ]
-                self.enhancer_proportion_hard_filter_min = settings[
-                    "enhancer_proportion_hard_filter_min"
-                ]
-                self.cell_line_expression_hard_filter_max = settings[
-                    "cell_line_expression_hard_filter_max"
-                ]
-                self.cell_line_expression_hard_filter_min = settings[
-                    "cell_line_expression_hard_filter_min"
-                ]
-                self.gene_size_hard_filter_max = settings[
-                    "gene_size_hard_filter_max"
-                ]
-                self.gene_size_hard_filter_min = settings[
-                    "gene_size_hard_filter_min"
-                ]
-                self.symmetry_hard_filter_max = settings[
-                    "symmetry_hard_filter_max"
-                ]
-                self.symmetry_hard_filter_min = settings[
-                    "symmetry_hard_filter_min"
-                ]
-
-                self.relative_std_weight = settings["relative_std_weight"]
-                self.relative_anomalous_expression_weight = settings[
-                    "relative_anomalous_expression_weight"
-                ]
-                self.relative_enhancer_count_weight = settings[
-                    "relative_enhancer_count_weight"
-                ]
-                self.relative_enhancer_proportion_weight = settings[
-                    "relative_enhancer_proportion_weight"
-                ]
-                self.relative_cell_line_expression_weight = settings[
-                    "relative_cell_line_expression_weight"
-                ]
-                self.relative_gene_size_weight= settings[
-                    "relative_gene_size_weight"
-                ]
-                self.relative_symmetry_weight = settings[
-                    "relative_symmetry_weight"
-                ]
-
-                self.enhancer_kernel_shape = \
-                    settings["enhancer_kernel_shape"]
-                self.enhancer_kernel_size_type = \
-                    settings["enhancer_kernel_size_type"]
-                self.absolute_enhancer_kernel_size = \
-                    settings["absolute_enhancer_kernel_size"]
-                self.absolute_enhancer_kernel_sigma = \
-                    settings["absolute_enhancer_kernel_sigma"]
-                self.relative_enhancer_kernel_size = \
-                    settings["relative_enhancer_kernel_size"]
-                self.relative_enhancer_kernel_sigma = \
-                    settings["relative_enhancer_kernel_sigma"]
-
-                self.quiescent_kernel_shap = \
-                    settings["quiescent_kernel_shape"]
-                self.quiescent_kernel_size_type = \
-                    settings["quiescent_kernel_size_type"]
-                self.absolute_quiescent_kernel_size = \
-                    settings["absolute_quiescent_kernel_size"]
-                self.relative_quiescent_kernel_size = \
-                    settings["relative_quiescent_kernel_size"]
-                self.relative_quiescent_kernel_sigma = \
-                    settings["relative_quiescent_kernel_sigma"]
-
-                self.cell_line_specific_expression_threshold = \
-                    settings["cell_line_specific_expression_threshold"]
-                self.interferring_gene_overlaps = \
-                    settings["interferring_gene_overlaps"]
-
-                self.convolution_limit = \
-                    settings["convolution_limit"]
-                self.enhancer_convolution_weight = \
-                    settings["enhancer_convolution_weight"]
-                self.quiescent_convolution_weight = \
-                    settings["quiescent_convolution_weight"]
-                self.plateau_threshold = \
-                    settings["plateau_threshold"]
-                
-                self.inserted_sequence = \
-                    settings["inserted_sequence"]
-                self.partial_insertion_per_region = \
-                    settings["partial_insertion_per_region"]
-                    
+                for key, value in settings.items():
+                    if hasattr(self, key):
+                        setattr(self, key, value)
+        except FileNotFoundError:
+            print("ERROR: Config file not found.")
         except Exception as e:
-            print("ERROR: ", e)
-            
-    def print_config(self):
+            print(f"ERROR: Failed to read config file: {e}")
+    
+    def __str__(self) -> str:
         """
-        Prints the current config that the program will use
+        Returns a string representation of the config object.
         """
 
         current_config = vars(self)
-        print(', '.join("%s: %s" % setting for setting in current_config.items()))
+        config_str = ""
+        for key, value in current_config.items():
+            config_str += f"{key}: {value}\n"
+
+        return config_str
+    
+    def assign_unique_id(self):
+        """
+        Generates a unique ID for each dataframe.
+        """
+        
+        return self.__class__.__name__ + str(hash(self))
+    
+    def get_weights(self) -> list:
+        """
+        Returns the weights associated with the config object.
+        """
+        
+        return [
+            self.std_weight,
+            self.anomalous_expression_weight,
+            self.enhancer_count_weight,
+            self.enhancer_proportion_weight,
+            self.cell_line_expression_weight,
+            self.gene_size_weight,
+            self.symmetry_weight
+        ]
+    
+    def get_filters(self) -> list:
+        """Returns the filters associated with the config object."""
+    
+        return [
+            self.std_max,
+            self.std_min,
+            self.anomalous_expression_max,
+            self.anomalous_expression_min,
+            self.enhancer_count_max,
+            self.enhancer_count_min,
+            self.enhancer_proportion_max,
+            self.enhancer_proportion_min,
+            self.cell_line_expression_max,
+            self.cell_line_expression_min,
+            self.gene_size_max,
+            self.gene_size_min,
+            self.symmetry_max,
+            self.symmetry_min,
+        ]

@@ -8,8 +8,9 @@ class Coordinates:
         
         self.data = metrics.data
         self.overlaps = metrics.overlaps
-        self.generate_step_function_of_overlaps(self)
-        self.convolve_step_function_to_average_windowed_density(self, config, element_type)
+        self.generate_step_function_of_overlaps()
+        self.convolve_step_function(config)
+        self.find_plateaus(config)
         
 
     def generate_step_function_of_overlaps(self):
@@ -22,14 +23,13 @@ class Coordinates:
         self.data['Enhancer_step_function_x'] = \
             self.data.apply(self.step_function_x, axis = 1)
         self.data['Enhancer_step_function_y'] = \
-            self.data.apply(self.step_function_y, args = (self.overlaps,),
-                            axis = 1)
+            self.data.apply(self.step_function_y, axis = 1)
         
         self.data = \
             self.data.sort_values("Interest_score", ascending = False)\
                 .reset_index(drop = True)
 
-    def step_function_x(row):
+    def step_function_x(self, row):
         
         """
         step_function_mask returns an array of genome coordinates within
@@ -63,17 +63,18 @@ class Coordinates:
             
             step_function = np.logical_or(step_function, in_range).astype(int)
         
-    def convolve_step_function_to_average_windowed_density \
-        (self, config, element_type):
+        return step_function
+        
+    def convolve_step_function(self, config):
 
         """
         X and Y coordinates are generated for convolution
         of element step function with chosen kernel
         """
 
-        self.data[(element_type + "_convolution_x")] = \
+        self.data[("Enhancer_convolution_x")] = \
             [np.empty(0, dtype = float)] * len(self.data)
-        self.data[(element_type + "_convolution_y")] = \
+        self.data[("Enhancer_convolution_y")] = \
             [np.empty(0, dtype = float)] * len(self.data)
         
         self.data = self.data\
@@ -82,16 +83,10 @@ class Coordinates:
 
         for index, gene in self.data.head(config.convolution_limit).iterrows():
             
-            kernel = self.get_kernel(config.enhancer_kernel_shape, 
-                                int((config.relative_enhancer_kernel_size * \
-                                    (gene["Search_window_end"] - 
-                                    gene["Search_window_start"]))), 
-                                int(config.relative_enhancer_kernel_sigma * \
-                                    (gene["Search_window_end"] - 
-                                    gene["Search_window_start"])))
+            kernel = self.get_kernel(gene, config)
             
-            convolution_y = np.convolve(kernel, gene[(element_type + 
-                                                    "_step_function_y")])
+            convolution_y = np.convolve(kernel,
+                                        gene[("Enhancer_step_function_y")])
             convolution_x = (np.arange(
                 (gene["Search_window_start"] - (len(kernel) // 2)), 
                 (gene["Search_window_start"] - (len(kernel) // 2) + 
@@ -100,32 +95,42 @@ class Coordinates:
             gene, convolution_x, convolution_y = \
                 self.trim_convolution_ends(gene, convolution_x, convolution_y)
 
-            self.data.at[index, (element_type + "_convolution_x")] = \
+            self.data.at[index, ("Enhancer_convolution_x")] = \
                 convolution_x
-            self.data.at[index, (element_type + "_convolution_y")] = \
+            self.data.at[index, ("Enhancer_convolution_y")] = \
                 convolution_y
 
-    def get_kernel(kernel_shape, size, sigma):
+    def get_kernel(self, gene, config):
         
         """
         Kernel is generated as numpy array depending on desired shape and size
         """
+        shape = config.enhancer_kernel_shape
+        size = int((config.relative_enhancer_kernel_size * \
+                                    (gene["Search_window_end"] - 
+                                    gene["Search_window_start"])))
+        sigma = int(config.relative_enhancer_kernel_sigma * \
+                                    (gene["Search_window_end"] - 
+                                    gene["Search_window_start"]))
         
-        if kernel_shape == "flat":
+        if  shape == "flat":
             
             kernel = np.ones(size)
             
         
-        elif kernel_shape == "guassian":
+        elif shape == "guassian":
             
             kernel = np.zeros(size)
             np.put(kernel, (size // 2), 10)
             kernel = gaussian_filter1d(kernel, sigma)
             
         else:
+            
             raise Exception("Kernel shape is neither Flat nor Guassian")
+        
+        return kernel
 
-    def trim_convolution_ends(gene, convolution_x, convolution_y):
+    def trim_convolution_ends(self, gene, convolution_x, convolution_y):
         
         """
         Trims the ends of the convolutions 
@@ -146,6 +151,8 @@ class Coordinates:
         convolution_y = \
             convolution_y[upstream_cut_off_index[0][0]:\
                 downstream_cut_off_index[0][0]]
+        
+        return gene, convolution_x, convolution_y
         
     def find_plateaus(self, config):
         

@@ -5,10 +5,10 @@ class GeneAnnotations:
     
     def __init__(self, config):
         
-        self.read_gene_annotations(self, config.gene_annotation_reference)
-        self.clean_gene_annotations(self)
+        self.read_gene_annotations(config)
+        self.clean_gene_annotations(config)
             
-    def read_gene_annotations(self, file_path):
+    def read_gene_annotations(self, config):
         
         """
         Reads gene annotations gtf file into pandas dataframe
@@ -17,7 +17,7 @@ class GeneAnnotations:
         try:
             
             self.data = \
-                pd.read_csv(file_path,
+                pd.read_csv(config.gene_annotation_reference,
                             sep = "\t",
                             names = ["Chromosome",
                                      "Source",
@@ -70,3 +70,25 @@ class GeneAnnotations:
             .drop_duplicates(keep = False, subset = ["Gene_name"])
         self.data = self.data \
             .rename(columns = {"Start" : "Gene_start", "End" : "Gene_end"})
+            
+    def pickle_gene_annotations(self, config):
+        
+        """
+        Serialises dataframe and saves as file
+        """
+        
+        self.data.to_pickle(
+            config.working_directory +
+            "gene_annotations"
+            )
+    
+    def unpickle_gene_annotations(self, config):
+        
+        """
+        Unserialises dataframe and loads from file
+        """
+        
+        pd.read_pickle(
+            config.working_directory +
+            "gene_annotations"
+        )

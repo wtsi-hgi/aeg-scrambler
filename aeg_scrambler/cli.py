@@ -1,77 +1,148 @@
-"""Copyright (c) Ronnie Crawford.
+"""
+Copyright (c) Ronnie Crawford.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
 
 import typer
-
+from typing import Optional
+import pickle
 from .config import Config
-from .gene_annotations import GeneAnnotations
-from .gene_expression import GeneExpression
-from .regulatory_annotations import RegulatoryAnnotations
+from .input_data import (
+    CCLEExpression,
+    ExperimentalExpression,
+    GeneAnnotations,
+    RegulatoryAnnotations
+)
 from .metrics import Metrics
 from .coordinates import Coordinates
 from .sequences import Sequences
 
 app = typer.Typer()
+working_directory = "working/"
 
-@app.command()
-def hello(name):
-    
+def rank(config = None):    
     """
-    Look for and read config file, then update config
+    Ranks the genes.
     """
     
-    print(f'Hello {name}!')
+    config = Config(config)
     
-@app.command()
-def configure(configuration, path):
+    ccle_expression = CCLEExpression(config)
+    experimental_expression = ExperimentalExpression(config)
+    gene_annotations = GeneAnnotations(config)
+    regulatory_annotations = RegulatoryAnnotations(config)
     
-    """
-    Look for and read config file, then update config
-    """
-    
-    configuration.set_config_from_file(configuration, path)
-
-@app.command()
-def rank(configuration):
-    
-    """
-    Prioritises genes based on weights of various factors
-    """
-    
-    instance_gene_annotations = GeneAnnotations(configuration)
-    instance_gene_expressions = GeneExpression(configuration)
-    instance_regulatory_element_annotations = \
-        RegulatoryAnnotations(configuration)
-
-    instance_metrics = Metrics(
-        configuration,
-        instance_gene_annotations,
-        instance_regulatory_element_annotations,
-        instance_gene_expressions
+    metrics = Metrics(
+        config,
+        gene_annotations,
+        regulatory_annotations,
+        ccle_expression,
+        experimental_expression
     )
-    instance_metrics.print_metrics()
+    print(metrics.printable_ranks())
+    metrics.export_gene_scores_report(config)
 
+@app.command()
+def design(config = None):
+    
+    """
+    
+    """
+    
+    config = Config(config)
+    
+    ccle_expression = CCLEExpression(config)
+    experimental_expression = ExperimentalExpression(config)
+    gene_annotations = GeneAnnotations(config)
+    regulatory_annotations = RegulatoryAnnotations(config)
+    
+    metrics = Metrics(
+        config,
+        gene_annotations,
+        regulatory_annotations,
+        ccle_expression,
+        experimental_expression
+    )
+    
+    coordinates = Coordinates(config, metrics)
+    sequences = Sequences(config, coordinates)
+
+@app.command()
+def set_config(path = None):
+    
+    """
+    Initialises config for program,
+    can read from file otherwise will be set to defaults.
+    """
+    
+    config = Config(path)
+    print("Created new config: " + config.unique_id)
+    pickle_object(config)
+
+@app.command() 
+def view_config(config_id = None):
+    
+    """
+    Used to view settings of given config.
+    """
+    
+    config = unpickle_object(config_id)
+    print(config)
+
+@app.command()
+def load_user_data(config_id = None):
+    
+    """
+    Loads in user supplied data as specified in the config file.
+    """
+    
+    config = unpickle_object(config_id)
+    
+    ccle_expression = CCLEExpression(config)
+    experimental_expression = ExperimentalExpression(config)
+    gene_annotations = GeneAnnotations(config)
+    regulatory_annotations = RegulatoryAnnotations(config)
+    
+    pickle_object(ccle_expression)
+    pickle_object(experimental_expression)
+    pickle_object(gene_annotations)
+    pickle_object(regulatory_annotations)
+
+@app.command()
+def generate_metrics(
+    config_id,
+    ccle_expression_id,
+    experimental_expression_id,
+    gene_annotations_id,
+    regulatory_annotations_id
+):
+    
+    """
+    Using entered data, finds various metrics for each
+    gene and ranks them according to weights in table.
+    """
+    config = unpickle_object(config_id)
+    ccle_expression = unpickle_object(ccle_expression_id)
+    experimental_expression = unpickle_object(experimental_expression_id)
+    gene_annotations = unpickle_object(gene_annotations_id)
+    regulatory_annotations = unpickle_object(regulatory_annotations_id)
+    
+    metrics = Metrics(
+        config,
+        gene_annotations,
+        regulatory_annotations,
+        ccle_expression,
+        experimental_expression
+    )
+   
 @app.command()
 def tune(gene, metrics):
     """
     Tune the weights to find the local maxima rank of a specific gene
     """
     pass
-
-@app.command()
-def design(configuration, metrics):
-    
-    """
-    Taking a list of ranked genes, will design pegRNA sequences for the 
-    regions between enhancers and call PRIDICT to find the most efficient
-    in each inter-enhancer sequence
-    """
-    
-    coordinates = Coordinates(configuration, metrics)
-    sequences = Sequences(configuration, coordinates)
 
 @app.command()
 def explore():
@@ -92,12 +163,25 @@ def export():
     convolution signal etc as decided by options
     """
 
-    print("Exporting")
+    pass
+    
+def pickle_object(object):
+    
+    with open(working_directory + object.unique_id, "wb") as file:
+        
+        pickle.dump(object, file)
+        
+    tracker = tracker.append(object.unique_id)
+    
+def unpickle_object(object_id):
+    
+    with open(working_directory + object_id, "rb") as file:
+    
+        return pickle.load(file)
 
 def main():
     
     app()
-    configuration = Config()
-
+    
 if __name__ == "__main__":
     main()
