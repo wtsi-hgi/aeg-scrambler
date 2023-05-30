@@ -22,9 +22,7 @@ from .sequences import Sequences
 app = typer.Typer()
 working_directory = "working/"
 
-@app.command()
-def rank(config = None):
-    
+def rank(config = None):    
     """
     Ranks the genes.
     """
@@ -139,30 +137,6 @@ def generate_metrics(
         experimental_expression
     )
    
-    
-@app.command()
-def test(path = None):
-    
-    pass
-
-    # rank --tune
-    
-    # rank --view
-    
-    # rank --export
-    #metrics.export_gene_scores_report(config)
-    
-    # cluster
-    #coordinates = Coordinates(config, metrics)
-    
-    # cluster --export
-    #coordinates.export_convolutions(config)
-    
-    # design
-    #sequences = Sequences(config, coordinates)
-    
-    #design --export
-
 @app.command()
 def tune(gene, metrics):
     """
