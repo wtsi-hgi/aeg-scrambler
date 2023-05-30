@@ -14,7 +14,7 @@ df = df.drop(df.columns[0], axis=1)
 df = df[:10]
 
 # Add desired score column
-df['Desired_score'] = [8, 10, 11, 4, 3, 6, 3, 8, 7, 10, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4]
+df['Desired_score'] = [8, 10, 11, 4, 3, 6, 3, 8, 7, 10]
 
 def gradientDescent(weights, learning_rate=1e-4, epochs=1e4):
     """
