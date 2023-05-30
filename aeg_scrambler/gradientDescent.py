@@ -1,6 +1,9 @@
+import torch
+import pandas as pd
+
 # Read csv file
 df = pd.read_csv(
-    'datafram/path/here',
+    'dataframe/file/here',
     skiprows=56,
     sep='\t')
 
@@ -8,80 +11,111 @@ df = pd.read_csv(
 df = df.drop(df.columns[0], axis=1)
 
 # Get first 10 rows
-df = df[:10]
+df = df[:20]
 
 # Add desired score column
-df['Desired_score'] = [8, 10, 11, 4, 3, 6, 3, 8, 7, 10]
+df['Desired_score'] = [8, 10, 11, 4, 3, 6, 3, 8, 7, 10, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4]
 
-# Create new df
-df = df[
-    ['Gene_name', 
-     'Interest_score',
-     'Desired_score',
-     'Scaled_std',
-     'Scaled_anomalous_score',
-     'Scaled_enhancer_count',
-     'Scaled_enhancer_proportion',
-     'Scaled_specific_gene_expression',
-     'Scaled_gene_size'
-    ]]
-
-weights = {
-    'Scaled_std': 1,
-    'Scaled_anomalous_score': 0.5,
-    'Scaled_enhancer_count': 0.25,
-    'Scaled_enhancer_proportion': 0.75,
-    'Scaled_specific_gene_expression': 0.8
-}
-
-total_loss = []
-
-def gradientDescent(learning_rate=0.001, epochs=1000, **weights):
+def gradientDescent(weights, learning_rate=1e-4, epochs=1e4):
     """
         Performs gradient descent on a dataframe, which must contain 
         an interest score and a desired interest score column.
         
         Args:
-            learning_rate=0.001 - by how much the model nudges the 
+            weights - a tensor of the initialised weights.
+
+            learning_rate=1e-4 - by how much the model nudges the 
             weights in the direction of the gradient of the loss.
             
-            epochs=1000 - how many iterations the model will run.
+            epochs=1e5 - how many iterations the model will run.
             
-            **weights - a dictionary of the form {weightname : weight}.
-        
         Returns:
             weights - a new set of optimal weights.
     """
     
-    weight_names, weights = zip(*weights['weights'].items())
-    weight_names, weights = list(weight_names), list(weights)
-    
-    for e in range(epochs):                
+    # model output
+    def forward(x):
+        return sum(weights * x)
+
+    # loss = MSE
+    def loss(y, y_pred):
+        return (y_pred - y)**2
+
+    print('Weights before: ', weights.data)
+
+    # Training
+    for epoch in range(int(epochs)):
         for _, row in df.iterrows():
+            X = torch.tensor(
+                [row['Scaled_std'], 
+                row['Scaled_anomalous_score'], 
+                row['Scaled_enhancer_count'], 
+                row['Scaled_enhancer_proportion'],
+                row['Scaled_specific_gene_expression']
+                ], 
+                requires_grad=True)
             
-            # Calculate interest score with current weights
-            interest_score_calc = sum([weights[i] * row[weight_names[i]] for i in range(len(weights))])  
+            Y = torch.tensor(row['Desired_score'])
             
-            # Calculate loss
-            loss = (row['Desired_score'] - interest_score_calc)
+            # predict = forward pass
+            y_pred = forward(X)
 
-            for i in range(len(weights)):
-                # Calculate partial derivative
-                partial_derivative = -2 * weights[i] * loss
+            # loss
+            l = loss(Y, y_pred)
 
-                # Update weight
-                weights[i] -= (learning_rate * partial_derivative)
-            
-        loss = sum((df['Desired_score'] - interest_score_calc) ** 2)
-        total_loss.append(loss)
+            # calculate gradients = backward pass
+            l.backward()
+
+            # update weights
+            with torch.no_grad():
+                weights -= learning_rate * weights.grad
+
+            # zero the gradients after updating
+            weights.grad.zero_()
         
-        if e % 100 == 0: 
-            print(e)
-            loss = sum((df['Desired_score'] - interest_score_calc) ** 2)
-            print('loss: ', loss)
-            print('Weights: ', weights)
-            print()
+        # Quite arbitrary loss decay that slightly improves the model
+        if epoch > 5000:
+            learning_rate *= 0.1
+            
+        if epoch % 1000 == 0:
+            print(f'{epoch}...')
 
+    print()
+    print('New weights: ', weights.data)
     return weights
-        
-gradientDescent(weights=weights)
+
+loss = sum(df['Desired_score'] - df['Interest_score'])**2
+print(f'Loss beforehand: {loss}')
+
+weights = torch.tensor([1, 0.5, 0.25, 0.75, 0.8], dtype=torch.float32, requires_grad=True)
+weights = gradientDescent(weights)
+
+def calc_interest_score(row):
+    calc = (
+        row['Scaled_std']*weights[0] + 
+        row['Scaled_anomalous_score']*weights[1] + 
+        row['Scaled_enhancer_count']*weights[2] + 
+        row['Scaled_enhancer_proportion']*weights[3] +
+        row['Scaled_specific_gene_expression']*weights[4]
+    )
+    
+    return calc.item()
+
+df['New_Score'] = df.apply(calc_interest_score, axis=1)
+df = df[['Gene_name', 
+    'Interest_score',
+    'Desired_score',
+    'New_Score',
+    'Scaled_std',
+    'Scaled_anomalous_score',
+    'Scaled_enhancer_count',
+    'Scaled_enhancer_proportion',
+    'Scaled_specific_gene_expression',
+    'Scaled_gene_size']
+]
+
+loss = sum(df['Desired_score'] - df['New_Score'])**2
+print(f'Overall loss: {loss}')
+print()
+
+print(df)
