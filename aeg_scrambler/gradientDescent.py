@@ -11,7 +11,7 @@ df = pd.read_csv(
 df = df.drop(df.columns[0], axis=1)
 
 # Get first 10 rows
-df = df[:20]
+df = df[:10]
 
 # Add desired score column
 df['Desired_score'] = [8, 10, 11, 4, 3, 6, 3, 8, 7, 10, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4]
@@ -27,7 +27,7 @@ def gradientDescent(weights, learning_rate=1e-4, epochs=1e4):
             learning_rate=1e-4 - by how much the model nudges the 
             weights in the direction of the gradient of the loss.
             
-            epochs=1e5 - how many iterations the model will run.
+            epochs=1e4 - how many iterations the model will run.
             
         Returns:
             weights - a new set of optimal weights.
@@ -87,7 +87,7 @@ def gradientDescent(weights, learning_rate=1e-4, epochs=1e4):
 loss = sum(df['Desired_score'] - df['Interest_score'])**2
 print(f'Loss beforehand: {loss}')
 
-weights = torch.tensor([1, 0.5, 0.25, 0.75, 0.8], dtype=torch.float32, requires_grad=True)
+weights = torch.randn(5, requires_grad=True)
 weights = gradientDescent(weights)
 
 def calc_interest_score(row):
