@@ -31,6 +31,7 @@ pyranges = "^0.0.125"
 scikit-learn = "^1.2.2"
 pandas = "^2.0.1"
 pyyaml = "^6.0"
+torch = "^2.0.1"
 
 [tool.poetry.group.dev]
 optional = true
