@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 import pandas as pd
 
 class GradientDescent:
@@ -7,10 +8,8 @@ class GradientDescent:
             self, 
             df,
             weight_names,
-            #genes_of_interest, 
-            *column_weights, 
             learning_rate=1e-4, 
-            epochs=1e4
+            epochs=1e5
         ):
         """
             Finds the optimal weights for calculating the interest score,
@@ -22,13 +21,11 @@ class GradientDescent:
                 weight_names - a list of weight names.
 
                 genes_of_interest - a list of gene names of interest.
-
-                *column_weights - 
                 
                 learning_rate=1e-4 - by how much the model nudges the weights
                 in the direction of the loss.
 
-                epochs=1e4 - how many iterations the model will run.
+                epochs=1e5 - how many iterations the model will run.
             
             Returns:
                 weights - a list of optimal weights.
@@ -46,19 +43,54 @@ class GradientDescent:
             'Scaled_gene_size'
         ]
 
-        self.df = df[self.columns]
+        self.df = df
         self.weight_names = weight_names
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.weights = torch.randn(5, requires_grad=True)
-        self.loss = self.calculate_loss()
 
+    def assign_gene_priority(self, genes_of_interest, agnostic=True):
+        """
+            Assigns a score distribution to a dataframe containing genes. 
+            The distribution is the 'desired' interest scores of the genes,
+            and will thus be used to calculate the 'loss' of the gradient 
+            descent model.
+
+            Args:
+                genes_of_interest - list of genes the user is interested in,
+                the model will assign more priority to these and aim to 
+                optimise weights such that they end up with a relatively high 
+                interest score.
+
+                agnostic = True - if set to False, the genes_of_interest will 
+                not receieve equal priority amongst themselves. It will be 
+                assumed instead that although all 10 genes are important, the
+                first is more important than the second, the second than the 
+                third, and so on.
+            
+            Returns:
+                score_distribution - a distribution of scores which represents
+                the 'desired' gene interest scores
+        """
+        assert len(genes_of_interest) < 11
+
+        genes_of_interest_set = set(genes_of_interest)
+        self.df['Desired_score'] = 0 
+        self.df.loc[self.df['Gene_name'].isin(genes_of_interest_set), 'Desired_score'] = 10
 
     def calculate_loss(self) -> float:
-        return (self.df['Interest_score'] - self.df['Desired_score'])**2
+        return sum((self.df['Interest_score'] - self.df['Desired_score'])**2)
 
     def optimise_weights(self) -> pd.DataFrame:
         """
+            Find optimal weights to satisfy a desired distribution of genes 
+            within a dataframe.
+
+            Args:
+                None.
+
+            Returns:
+                Dataframe with rearranged genes.
         """
 
         # model output
@@ -67,12 +99,17 @@ class GradientDescent:
 
         # loss = MSE
         def loss(y, y_pred):
-            return torch.mean((y_pred - y) ** 2)  # Compute mean squared error instead of element-wise squared differences
+            return torch.mean((y_pred - y) ** 2)
 
-        # Extract relevant columns as NumPy array
-        X = torch.tensor(df[['Scaled_std', 'Scaled_anomalous_score', 'Scaled_enhancer_count',
-                            'Scaled_enhancer_proportion', 'Scaled_specific_gene_expression']].values,
-                        requires_grad=True)
+        # Extract relevant columns
+        X = torch.tensor(df[
+            ['Scaled_std', 
+             'Scaled_anomalous_score', 
+             'Scaled_enhancer_count',
+             'Scaled_enhancer_proportion', 
+             'Scaled_specific_gene_expression']].values,
+             requires_grad=True
+        )
         Y = torch.tensor(df['Desired_score'].values)
 
         # Training
@@ -93,12 +130,9 @@ class GradientDescent:
             # zero the gradients after updating
             self.weights.grad.zero_()
 
-            # Quite arbitrary loss decay that slightly improves the model
-            if epoch > 5000:
-                self.learning_rate *= 0.1
-
-            if epoch % 1000 == 0:
+            if epoch % 10_000 == 0:
                 print(f'{epoch}...')
+                print(f'Loss: {l.data}')
 
         print(f'New weights: {self.weights}')
 
@@ -107,7 +141,6 @@ class GradientDescent:
 
         return self.df
 
-
     def update_interest_score(self) -> None:
         """
             Calculates the the interest score for each row in the model, 
@@ -115,15 +148,10 @@ class GradientDescent:
         """
 
         def interest_score(row):
-            calc = (
-                self.weights[0] * row['Scaled_std'] + 
-                self.weights[1] * row['Scaled_anomalous_score'] + 
-                self.weights[2] * row['Scaled_enhancer_count'] + 
-                self.weights[3] * row['Scaled_enhancer_proportion'] +
-                self.weights[4] * row['Scaled_specific_gene_expression']
-            )
+            score = sum([self.weights[val] * row[weight_col] 
+                        for val, weight_col in enumerate(self.weight_names)])
             
-            return calc.item()
+            return score.item()
 
         self.df['Interest_score'] = self.df.apply(
             interest_score,
@@ -150,12 +178,6 @@ df = pd.read_csv(
 # Drop first column
 df = df.drop(df.columns[0], axis=1)
 
-# Get first 10 rows
-df = df[:10]
-
-# Add desired score column
-df['Desired_score'] = [0, 0, 9, 1, 0, 8, 0, 0, 7, 0]
-
 weight_names = [
     'Scaled_std', 
     'Scaled_anomalous_score', 
@@ -165,18 +187,8 @@ weight_names = [
 ]
 
 model = GradientDescent(df, weight_names)
-model.optimise_weights()
-weights = model.weights
-print(weights)
+model.assign_gene_priority(['TPM1', 'SOX2'])
 print(model.df)
 
-loss = sum(df['Desired_score'] - df['Interest_score'])**2
-print(f'Loss beforehand: {loss}')
-
-
-loss = sum(df['Desired_score'] - df['New_Score'])**2
-df = df.sort_values(['New_Score'], ascending = False)
-print(f'Overall loss: {loss}')
-print()
-
-print(df)
+model.optimise_weights()
+print(model.df)
