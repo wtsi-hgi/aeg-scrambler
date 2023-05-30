@@ -8,24 +8,6 @@ class Sequences:
     def __init__(self, config, coordinates):
 
 
-        self.plateau_insertions = pd.DataFrame(columns = ["Sequence_name",
-                                                      "Insertion_sequence",
-                                                      "Insertion_location",
-                                                      "Plateau_sequence"])
-        self.inserted_sequence = config.inserted_sequence
-        self.partial_insertions_per_region = \
-            config.partial_insertions_per_region
-        self.data = coordinates.data
-        self.initialise_plateau_insertions()
-        self.iterate_gene_plateaus(config)
-        self.run_pridict(config)
-        
-    def initialise_plateau_insertions(self):
-        
-        """
-        Creates empty dataframe ready to accept further inputs.
-        """
-        
         self.plateau_insertions = pd.DataFrame(
             columns = [
                 "Sequence_name", 
@@ -33,6 +15,17 @@ class Sequences:
                 "Insertion_location", 
                 "Plateau_sequence"
             ])
+        self.inserted_sequence = config.inserted_sequence
+        self.partial_insertions_per_region = \
+            config.partial_insertions_per_region
+        self.data = coordinates.data
+        self.iterate_gene_plateaus(config)
+        print(self.plateaus)
+        self.run_pridict(config)
+        print(self.plateaus)
+        self.find_fasta(config)
+        print(self.plateaus)
+        self.generate_pridict_input(config)
         
     def iterate_gene_plateaus(self, config):
         
@@ -52,9 +45,6 @@ class Sequences:
             self.plateaus["Gene_name"] = gene["Gene_name"]
             self.plateaus["Chromosome"] = "chr" + gene["Chromosome"]
             self.plateaus["Strand"] = gene["Strand"]
-            
-            self.find_fasta(config)
-            self.generate_pridict_input(config)
         
     def find_fasta(self, config):
         
@@ -87,10 +77,16 @@ class Sequences:
             axis = 1
         )
         
+        with open(
+            config.results_directory + "sequences_for_pridict.csv", "w"
+        ) as pridict_input:
+
+            pridict_input.write("sequence_name,editseq\n")
+        
         self.plateau_insertions.to_csv(
             (config.results_directory + "sequences_for_pridict.csv"),
             index = False, columns = ["Sequence_name", "Sequence"],
-            mode = "w", header = False
+            mode = "a", header = False
         )
 
     def generate_insertion_prefixes_and_suffixes(self, plateau):
@@ -129,10 +125,12 @@ class Sequences:
                     new_row = pd.Series({
                         "Sequence_name" : (
                             plateau["Gene_name"] + 
-                            " " + plateau["Chromosome"] + 
-                            " " + plateau["Strand"] + 
-                            " "  + str(plateau["Start"]) + 
-                            "-" + str(plateau["End"])
+                            "_" + plateau["Chromosome"] + 
+                            "_" + plateau["Strand"] + 
+                            "_"  + str(plateau["Start"]) + 
+                            "-" + str(plateau["End"]) +
+                            "+" + str(position + checked_position) +
+                            ":" + absent_sequence
                         ),
                         "Insertion_sequence" : absent_sequence,
                         "Insertion_location" : (position + checked_position),
@@ -144,7 +142,7 @@ class Sequences:
                         axis = 0, ignore_index = True
                     )
                     
-                    if len(plateau_insertion_sites.index) > self.partial_insertions_per_region:
+                    if len(plateau_insertion_sites.index) < self.partial_insertions_per_region:
                         
                         self.plateau_insertions = pd.concat(
                             [self.plateau_insertions, plateau_insertion_sites], 

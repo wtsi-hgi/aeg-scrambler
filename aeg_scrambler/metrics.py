@@ -436,11 +436,7 @@ class Metrics:
         
         id = config.unique_id[:14]
         report_path = config.gene_report_directory + \
-<<<<<<< Updated upstream
             "gene_rankings_" + id + ".txt"
-=======
-            "gene_rankings_" + id[6:14] + ".txt"
->>>>>>> Stashed changes
         
         
         with open(report_path, "w") as report:
