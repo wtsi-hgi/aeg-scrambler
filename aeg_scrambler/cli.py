@@ -6,8 +6,12 @@ LICENSE file in the root directory of this source tree.
 """
 
 import typer
-from typing import Optional
 import pickle
+import pandas as pd
+from typing import Optional
+from pathlib import Path
+
+from .gradientDescent import GradientDescent
 from .config import Config
 from .input_data import (
     CCLEExpression,
@@ -21,6 +25,43 @@ from .sequences import Sequences
 
 app = typer.Typer()
 working_directory = "working/"
+
+@app.command()
+def prioritise(dataframe, genes, weights=None, skiprows=56):
+    """
+
+    """
+    if weights is None:
+        weights = [
+            'Scaled_std', 
+            'Scaled_anomalous_score', 
+            'Scaled_enhancer_count', 
+            'Scaled_enhancer_proportion', 
+            'Scaled_specific_gene_expression'
+        ]
+
+    equal_index = dataframe.find('=')
+    dataframe = dataframe[equal_index + 1:]
+
+    equal_index = genes.find('=')
+    genes = [genes[equal_index + 1:]]
+
+    # Read csv file
+    df = pd.read_csv(
+        dataframe,
+        skiprows=int(skiprows),
+        sep='\t'
+    )
+    
+    # Drop first column
+    df = df.drop(df.columns[0], axis=1)
+    
+    model = GradientDescent(df, weights)
+    model.assign_gene_priority(genes)
+    model.optimise_weights()
+
+    print(model.df)
+    return model
 
 def rank(config = None):    
     """
