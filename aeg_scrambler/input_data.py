@@ -138,7 +138,7 @@ class ExperimentalExpression(InputData):
             skiprows = 1
         )
        
-    def clean(self) -> None:
+    def clean(self, _) -> None:
         """
         Cleans the expression data specific to the cell line of interest by
         turning minus infinite strings into a floating point representation

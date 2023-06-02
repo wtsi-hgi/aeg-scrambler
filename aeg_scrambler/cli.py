@@ -11,7 +11,7 @@ import pandas as pd
 from typing import Optional
 from pathlib import Path
 
-from .gradientDescent import GradientDescent
+#from .gradientDescent import GradientDescent
 from .config import Config
 from .input_data import (
     CCLEExpression,
@@ -63,6 +63,7 @@ def prioritise(dataframe, genes, weights=None, skiprows=56):
     print(model.df)
     return model
 
+@app.command()
 def rank(config = None):    
     """
     Ranks the genes.
