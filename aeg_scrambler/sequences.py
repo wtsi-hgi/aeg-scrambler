@@ -65,33 +65,43 @@ class Sequences:
             ]
         )
         
+        previous_insertions = []
+        
         for insertion_name, insertion_sequence in self.generate_insertions(plateau):
             
-            insertion = pd.DataFrame({
-                "sequence_name" : [insertion_name],
-                "editseq" : [insertion_sequence]
-            })
+            if insertion_name not in previous_insertions:
             
-            plateau_specific_insertions = pd.concat(
-                [plateau_specific_insertions, insertion],
-                axis = 0,
-                ignore_index = True
-            )
+                previous_insertions.append(insertion_name)
             
-            if len(
-                plateau_specific_insertions
-            ) > self.partial_insertions_per_region:
+                insertion = pd.DataFrame({
+                    "sequence_name" : [insertion_name],
+                    "editseq" : [insertion_sequence]
+                })
                 
-                    plateau_specific_insertions.to_csv(
-                        (self.results_directory +
-                         "sequences_for_pridict.csv"),
-                        index = False,
-                        header = True
-                    )
+                plateau_specific_insertions = pd.concat(
+                    [plateau_specific_insertions, insertion],
+                    axis = 0,
+                    ignore_index = True
+                )
+                
+                if len(
+                    plateau_specific_insertions
+                ) > self.partial_insertions_per_region:
+                    
+                        plateau_specific_insertions.to_csv(
+                            (self.results_directory +
+                            "sequences_for_pridict.csv"),
+                            index = False,
+                            header = True
+                        )
 
-                    self.run_pridict()
-
-                    break
+                        self.run_pridict()
+                        pridict_output = self.read_pridict_output(
+                            insertion_name
+                        )
+                        print(self.clean_pridict_output(pridict_output))
+                        
+                        break
 
     def generate_insertions(self, plateau):
         
@@ -105,7 +115,11 @@ class Sequences:
             
             for insertion_index in insertion_indicies:
                 
-                insertion_name = self.name_insertion(plateau, insertion_index, absent_sequence)
+                insertion_name = self.name_insertion(
+                    plateau,
+                    insertion_index,
+                    absent_sequence
+                )
                 insertion_sequence = self.insert_insertion_sequence(
                     plateau,
                     insertion_index,
@@ -199,3 +213,27 @@ class Sequences:
             self.results_directory
             
         ])
+        
+    def read_pridict_output(self, insertion_name):
+        
+        return pd.read_csv(
+            self.results_directory +
+            insertion_name +
+            "_pegRNA_Pridict_full.csv"
+        )
+        
+        #delete pridict output file
+        
+    def clean_pridict_output(self, pridict_output):
+        
+        pridict_output.drop(
+            [["Original_sequences", "Edited_sequences"]],
+            axis = 1,
+            inplace = True
+        )
+        pridict_output = pridict_output[self.output["Editing_Position"] >= 10]
+        pridict_output = pridict_output.sort_values(
+            "PRIDICT_editing_Score_deep", 
+            ascending = False
+        ).reset_index()
+        return pridict_output
