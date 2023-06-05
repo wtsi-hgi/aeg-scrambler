@@ -8,6 +8,7 @@ LICENSE file in the root directory of this source tree.
 import typer
 from typing import Optional
 import pickle
+import numpy as np
 
 from .gradientDescent import GradientDescent
 from .config import Config
@@ -61,7 +62,7 @@ def load_data_from_config(config):
     return metrics, config
 
 @app.command()
-def prioritise(config:str, genes:list[str], agnostic=True):
+def prioritise(config:str, genes:list[str], agnostic:bool):
     """Given a set of genes of interest, will attempt to reorganise the 
     dataframe so that these genes will be prioritised and will appear 
     more towards the top of the dataframe. This means that other genes not 
@@ -85,10 +86,10 @@ def prioritise(config:str, genes:list[str], agnostic=True):
     df = metrics.data
 
     model = GradientDescent(df, genes, config)
-    model.assign_gene_priority(genes)
+    model.assign_gene_priority(genes, agnostic)
     model.optimise_weights()
 
-    print(model.df.head(15))
+    print(model.df.head(20))
     return
 
 @app.command()

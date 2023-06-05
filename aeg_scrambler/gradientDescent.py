@@ -75,14 +75,24 @@ class GradientDescent:
             self.df - the objects dataframe, which contains the new column.
         """
         assert len(genes) < 11
-
-        genes = set(genes)
         
         # define column
         self.df[desired_score_col] = 0 
-        self.df.loc[
-            self.df[gene_name_col].isin(genes), desired_score_col
-        ] = 10
+        
+        if agnostic:
+            print('agnostic')
+            self.df.loc[
+                self.df[gene_name_col].isin(genes), desired_score_col
+            ] = 10
+        else:
+            print('not agnostic')
+            distribution = np.linspace(100, 10, len(genes))
+            new_val = {gene:score for gene, score in zip(genes, distribution)}
+            print(new_val)
+            
+            self.df[desired_score_col] = self.df[gene_name_col].map(new_val)
+
+        self.df = self.df.fillna(0)
 
         return self.df
 
