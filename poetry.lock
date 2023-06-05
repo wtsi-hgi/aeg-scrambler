@@ -1463,6 +1463,22 @@ snowballstemmer = ">=2.2.0"
 toml = ["tomli (>=1.2.3)"]
 
 [[package]]
+name = "pyfaidx"
+version = "0.7.2.1"
+description = "pyfaidx: efficient pythonic random access to fasta subsequences"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pyfaidx-0.7.2.1-py3-none-any.whl", hash = "sha256:eee13d35bb5f2aa65932a9ad9dd74fa695aefe6e0baafc5836cfa869a7695acc"},
+    {file = "pyfaidx-0.7.2.1.tar.gz", hash = "sha256:30f0d20a9e3d53353fb20eb69b7e22e6f01a53ed4f21b3e17dd408f0be5051a0"},
+]
+
+[package.dependencies]
+setuptools = "*"
+six = "*"
+
+[[package]]
 name = "pyflakes"
 version = "2.5.0"
 description = "passive checker of Python programs"
@@ -1981,7 +1997,7 @@ jeepney = ">=0.6"
 name = "setuptools"
 version = "67.7.2"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -2344,4 +2360,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "d8670712c188526e3a3d46e3776ef8f0f7acfb4aeac0404b07dba614f7c53e4a"
+content-hash = "aaf27711fa8d063085fd57d0a9bb2a64a08a9e332358a6373515d93aa2edede7"
