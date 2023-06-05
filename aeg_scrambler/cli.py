@@ -95,11 +95,19 @@ def design(config = None):
     
     config = Config(config)
     
+    print('ccle...')
     ccle_expression = CCLEExpression(config)
+    
+    print('experimental...')
     experimental_expression = ExperimentalExpression(config)
+
+    print('gene annotations...')
     gene_annotations = GeneAnnotations(config)
+
+    print('regulatory annotations...')
     regulatory_annotations = RegulatoryAnnotations(config)
     
+    print('Merging metrics...')
     metrics = Metrics(
         config,
         gene_annotations,
@@ -108,7 +116,10 @@ def design(config = None):
         experimental_expression
     )
     
+    print('Finding coordinates...')
     coordinates = Coordinates(config, metrics)
+
+    print('Finding sequences...')
     sequences = Sequences(config, coordinates)
 
 @app.command()
