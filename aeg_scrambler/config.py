@@ -6,8 +6,18 @@ class Config:
     def __init__(self, path=None) -> None:
         """Assign default values to configuration variables."""
 
-        #Assign ID
+        # Assign ID
         self.unique_id = self.assign_unique_id()
+
+        # Important dataframe columns
+        self.columns = {
+            'Gene_name': str,
+            'Scaled_std': float, 
+            'Scaled_anomalous_score': float, 
+            'Scaled_enhancer_count': float, 
+            'Scaled_enhancer_proportion': float, 
+            'Scaled_specific_gene_expression': float
+        }
         
         # File paths
         self.results_directory = "../results/"
