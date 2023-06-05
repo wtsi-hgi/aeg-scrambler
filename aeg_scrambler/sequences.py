@@ -8,13 +8,20 @@ class Sequences:
     
     def __init__(self, config, coordinates):
         
+        """Sets up working directory, imports data from coordinate object,
+        calls iterate_plateaus_for_each_gene to work on each plateau.
+        
+        args:
+            config, coordinates
+        """
+        
         self.pridict_image_path = config.pridict_image_path
         self.pridict_path = config.pridict_path
         
-        self.working_directory = "./working/"
+        self.hashkey = str(hash(self))
+        self.working_directory = "./working/" + self.hashkey + "/"
         os.mkdir(self.working_directory)
         self.coordinates = coordinates.data
-        self.working_directory = config.working_directory
         self.inserted_sequence = config.inserted_sequence
         self.partial_insertions_per_region = \
             config.partial_insertions_per_region
@@ -24,6 +31,9 @@ class Sequences:
     def iterate_plateaus_for_each_gene(self, config):
         
         """Iterates through each gene, and applies methods to the gene-associated plateaus as necessary.
+        
+        args:
+            config
         """
         
         for index, gene in self.coordinates.head(
@@ -46,7 +56,13 @@ class Sequences:
                 
     def name_plateau(self, plateau):
         
-        """Generates a unique name for each plateau to help identify it
+        """Generates a unique name for each plateau to help identify it.
+        
+        args:
+            plateau
+            
+        returns:
+            plateau_name
         """
         
         return (
@@ -60,6 +76,12 @@ class Sequences:
     def find_fasta(self, plateaus, config):
         
         """For a given set of plateaus, finds the FASTA sequence of each plateau.
+        
+        args:
+            plateaus, config
+            
+        returns:
+            plateaus
         """
         
         plateaus_pr = pr.PyRanges(plateaus)
@@ -72,6 +94,9 @@ class Sequences:
         """Collates a list of suggested insertions within each plateau based on
         partial sequences found within the plateau, and then prepares each for PRIDICT,
         runs PRIDICT and then parses the output of each.
+        
+        args:
+            plateau
         """
         
         plateau_specific_insertions = pd.DataFrame(
@@ -141,6 +166,12 @@ class Sequences:
     def generate_insertions(self, plateau):
         
         """Collates all the insertions found within a given plateau.
+        
+        args:
+            plateau
+            
+        yields:
+            insertion_name, insertion_sequence
         """
         
         for found_sequence, absent_sequence in \
@@ -194,7 +225,13 @@ class Sequences:
     
     def find_partial_sequences(self, plateau, present_sequence):
         
-        """Finds already existing partial sequences of insertion sequence within plateaus
+        """Finds already existing partial sequences of insertion sequence within plateaus.
+        
+        args:
+            plateau, present_sequence
+            
+        returns:
+            insertion_indicies
         """
         
         found_instances = re.finditer(
@@ -208,6 +245,12 @@ class Sequences:
     def name_insertion(self, plateau, insertion_index, absent_sequence):
         
         """Produces a unique name for each insertion.
+        
+        args:
+            plateau, insertion_index, absent_sequence
+            
+        returns:
+            insertion_name
         """
         
         return (
@@ -230,6 +273,12 @@ class Sequences:
     ):
         
         """Inserts a sequence into another in a PRIDICT-parsable manner.
+        
+        args:
+            plateau, insertion_index, absent_sequence
+            
+        returns:
+            new_sequence
         """
         
         return str(
@@ -266,6 +315,12 @@ class Sequences:
     def read_pridict_output(self, insertion_name):
         
         """Generates a dataframe from the csv produced by PRIDICT.
+        
+        args:
+            insertion_name
+            
+        returns:
+            pridict_output
         """
         
         pridict_output_path = self.working_directory + insertion_name + "_pegRNA_Pridict_full.csv"
@@ -280,6 +335,12 @@ class Sequences:
     def clean_pridict_output(self, pridict_output):
         
         """Makes the dataframe of PRIDICT output human-readable.
+        
+        args:
+            pridict_output
+            
+        returns:
+            pridict_output
         """
         
         pridict_output.drop(
