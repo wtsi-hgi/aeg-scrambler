@@ -2,6 +2,7 @@ import pandas as pd
 import pyranges as pr
 import re
 import subprocess
+import os
 
 class Sequences:
     
@@ -10,14 +11,20 @@ class Sequences:
         self.pridict_image_path = config.pridict_image_path
         self.pridict_path = config.pridict_path
         
+        self.working_directory = "./working/"
+        os.mkdir(self.working_directory)
         self.coordinates = coordinates.data
-        self.results_directory = config.results_directory
+        self.working_directory = config.working_directory
         self.inserted_sequence = config.inserted_sequence
         self.partial_insertions_per_region = \
             config.partial_insertions_per_region
         self.iterate_plateaus_for_each_gene(config)
+        os.rmdir(self.working_directory)
 
     def iterate_plateaus_for_each_gene(self, config):
+        
+        """Iterates through each gene, and applies methods to the gene-associated plateaus as necessary.
+        """
         
         for index, gene in self.coordinates.head(
             config.convolution_limit
@@ -26,9 +33,7 @@ class Sequences:
             plateaus = pd.DataFrame({
                 "Start" : self.coordinates.loc[index, "Plateau_starts"], 
                 "End" : self.coordinates.loc[index, "Plateau_ends"]
-            })
-            plateaus["Start"] = plateaus["Start"].astype(int)
-            plateaus["End"] = plateaus["End"].astype(int)
+            }, dtype = int)
             plateaus = plateaus[plateaus["Start"] < plateaus["End"]]
             plateaus["Gene_name"] = gene["Gene_name"]
             plateaus["Chromosome"] = "chr" + gene["Chromosome"]
@@ -37,9 +42,12 @@ class Sequences:
                 self.name_plateau, axis = 1
             )
             plateaus = self.find_fasta(plateaus, config)
-            plateaus.apply(self.generate_pridict_input, axis = 1)
+            plateaus.apply(self.pridict_each_plateau, axis = 1)
                 
     def name_plateau(self, plateau):
+        
+        """Generates a unique name for each plateau to help identify it
+        """
         
         return (
             str(plateau["Gene_name"]) +
@@ -51,12 +59,20 @@ class Sequences:
     
     def find_fasta(self, plateaus, config):
         
+        """For a given set of plateaus, finds the FASTA sequence of each plateau.
+        """
+        
         plateaus_pr = pr.PyRanges(plateaus)
         plateaus["Sequence"] = pr.get_sequence(plateaus_pr, config.reference_genome_path)
         
         return(plateaus)
     
-    def generate_pridict_input(self, plateau):
+    def pridict_each_plateau(self, plateau):
+        
+        """Collates a list of suggested insertions within each plateau based on
+        partial sequences found within the plateau, and then prepares each for PRIDICT,
+        runs PRIDICT and then parses the output of each.
+        """
         
         plateau_specific_insertions = pd.DataFrame(
             columns = [
@@ -89,21 +105,43 @@ class Sequences:
                 ) > self.partial_insertions_per_region:
                     
                         plateau_specific_insertions.to_csv(
-                            (self.results_directory +
+                            (self.working_directory +
                             "sequences_for_pridict.csv"),
                             index = False,
                             header = True
                         )
 
                         self.run_pridict()
-                        pridict_output = self.read_pridict_output(
-                            insertion_name
-                        )
-                        print(self.clean_pridict_output(pridict_output))
+                        
+                        plateau_specific_output = pd.DataFrame()
+                        
+                        for insertion in self.plateau_specific_insertions["sequence_name"]:
+            
+                            pridict_output = self.read_pridict_output(
+                                insertion
+                            )
+                            pridict_output = self.clean_pridict_output(
+                                pridict_output
+                            )
+                            plateau_specific_output = pd.concat(
+                                [plateau_specific_output, pridict_output.head(1)],
+                                axis = 0,
+                                ignore_index = True
+                            )
+                    
+                            plateau_specific_output.to_csv(
+                                self.results_directory +
+                                plateau["Plateau_name"] +
+                                _suggested_insertions.tsv,
+                                sep = "\t"
+                            )
                         
                         break
 
     def generate_insertions(self, plateau):
+        
+        """Collates all the insertions found within a given plateau.
+        """
         
         for found_sequence, absent_sequence in \
             self.generate_partial_sequences():
@@ -129,6 +167,9 @@ class Sequences:
                 yield insertion_name, insertion_sequence
 
     def generate_partial_sequences(self):
+        
+        """Produces a size-sorted list of partial sequences of a given sequence.
+        """
         
         for absent_seq_size in range (0, len(self.inserted_sequence)):
             
@@ -166,6 +207,8 @@ class Sequences:
              
     def name_insertion(self, plateau, insertion_index, absent_sequence):
         
+        """Produces a unique name for each insertion.
+        """
         
         return (
             str(plateau["Gene_name"]) +
@@ -186,6 +229,9 @@ class Sequences:
         absent_sequence
     ):
         
+        """Inserts a sequence into another in a PRIDICT-parsable manner.
+        """
+        
         return str(
             plateau["Sequence"][:insertion_index] + 
             "(+" +
@@ -195,6 +241,9 @@ class Sequences:
         )
 
     def run_pridict(self):
+        
+        """Calls the terminal to run PRIDICT.
+        """
         
         subprocess.run([
             
@@ -206,25 +255,32 @@ class Sequences:
             self.pridict_path,
             "batch",
             "--input-fname",
-            self.results_directory + "sequences_for_pridict.csv",
+            self.working_directory + "sequences_for_pridict.csv",
             "--output-fname",
             "sequences_from_pridict",
             "--output-dir",
-            self.results_directory
+            self.working_directory
             
         ])
         
     def read_pridict_output(self, insertion_name):
         
-        return pd.read_csv(
-            self.results_directory +
-            insertion_name +
-            "_pegRNA_Pridict_full.csv"
+        """Generates a dataframe from the csv produced by PRIDICT.
+        """
+        
+        pridict_output_path = self.working_directory + insertion_name + "_pegRNA_Pridict_full.csv"
+        pridict_output = pd.read_csv(
+            pridict_output_path
         )
         
-        #delete pridict output file
+        os.remove(pridict_output_path)
+        
+        return pridict_output
         
     def clean_pridict_output(self, pridict_output):
+        
+        """Makes the dataframe of PRIDICT output human-readable.
+        """
         
         pridict_output.drop(
             [["Original_sequences", "Edited_sequences"]],
