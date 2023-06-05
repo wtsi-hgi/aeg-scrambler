@@ -16,13 +16,15 @@ class Metrics:
     ):
         
         self.assign_unique_id()
-        self.interesting_features = ["Std",
-                                     "Anomalous_score",
-                                     "Enhancer_count",
-                                     "Enhancer_proportion",
-                                     "Specific_gene_expression",
-                                     "Gene_size",
-                                     "Symmetry_ratio"]
+        self.interesting_features = [
+            "Std",
+            "Anomalous_score",
+            "Enhancer_count",
+            "Enhancer_proportion",
+            "Specific_gene_expression",
+            "Gene_size",
+            "Symmetry_ratio"
+        ]
         self.regulatory_data = regulatory_element_annotations.data
         self.merge_genetic_data(
             gene_annotations,
@@ -39,7 +41,8 @@ class Metrics:
         self.calculate_interest_score(config)
         
     def merge_genetic_data(
-        self, gene_annotations,
+        self, 
+        gene_annotations,
         ccle_expression,
         experimental_expression
     ):
@@ -213,7 +216,7 @@ class Metrics:
         self.data = pd.merge(
             self.data, 
             self.overlaps.groupby("Gene_name").size().reset_index(
-            name = ("Enhancer_count")), 
+                name = ("Enhancer_count")), 
                 on = "Gene_name", 
                 how = "inner"
             )
@@ -288,8 +291,7 @@ class Metrics:
         
         scaled_genes = scaled_genes.assign(
             Interest_score = (
-                scaled_genes["Std"] * \
-                    config.std_weight +
+                scaled_genes["Std"] * config.std_weight +
                 scaled_genes["Anomalous_score"] * \
                     config.anomalous_expression_weight +
                 scaled_genes["Enhancer_count"] * \
