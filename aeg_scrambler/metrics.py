@@ -420,7 +420,7 @@ class Metrics:
         
         return self.data.loc[
             :, (["Gene_name"] + ["Interest_score"] + self.interesting_features)
-        ].head(50)
+        ].round(2).head(50)
         
 
     def export_gene_scores_report(self, config):

@@ -20,7 +20,10 @@ class Sequences:
         
         self.hashkey = str(hash(self))
         self.working_directory = "./working/" + self.hashkey + "/"
-        os.mkdir(self.working_directory)
+        if not os.path.exists("./working/"):
+            os.mkdir("./working/")
+        if not os.path.exists(self.working_directory):
+            os.mkdir(self.working_directory)
         self.coordinates = coordinates.data
         self.inserted_sequence = config.inserted_sequence
         self.partial_insertions_per_region = \
