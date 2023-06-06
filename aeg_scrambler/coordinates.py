@@ -3,10 +3,6 @@ import pandas as pd
 from scipy.ndimage import gaussian_filter1d
 from pathlib import Path
 
-from config import Config
-from input_data import CCLEExpression, ExperimentalExpression, GeneAnnotations, RegulatoryAnnotations
-from metrics import Metrics
-
 convolutions_ext = "_convolutions.wig"
 
 class Coordinates:
