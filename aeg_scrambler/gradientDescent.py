@@ -83,7 +83,7 @@ class GradientDescent:
             print('agnostic')
             self.df.loc[
                 self.df[gene_name_col].isin(genes), desired_score_col
-            ] = 10
+            ] = 100
         else:
             print('not agnostic')
             distribution = np.linspace(100, 10, len(genes))
@@ -113,7 +113,7 @@ class GradientDescent:
 
         # model output
         def forward(x):
-            return torch.sum(self.weights * x, axis=1)
+            return torch.sum(self.weights * x, dim=1)
 
         # loss = Mean Squared Error (MSE)
         def loss(y, y_pred):
