@@ -157,7 +157,7 @@ class Sequences:
                             plateau_specific_output.to_csv(
                                 self.results_directory +
                                 plateau["Plateau_name"] +
-                                _suggested_insertions.tsv,
+                                "_suggested_insertions.tsv",
                                 sep = "\t"
                             )
                         

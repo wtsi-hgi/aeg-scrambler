@@ -33,7 +33,7 @@ class Config:
         self.ccle_expression_path = reference_dir + "CCLE_expressions_22Q4.csv"
         self.experimental_expression_path = reference_dir + "Expression_HAP1_c12.tsv"
         self.reference_genome_path = reference_dir + "genome.fa"
-        self.hic_path = ""
+        self.hic_path = reference_dir + "4DNFI1E6NJQJ.hic"
 
         # Experimental specific settings
         self.cell_line_of_interest = "HAP1"
@@ -78,22 +78,12 @@ class Config:
         self.relative_enhancer_kernel_size = 0.15
         self.relative_enhancer_kernel_sigma = 0.005
 
-        # Quiescent kernel
-        self.quiescent_kernel_shape = "guassian"
-        self.quiescent_kernel_size_type = "relative"
-        self.absolute_quiescent_kernel_size = 500
-        self.absolute_quiescent_kernel_sigma = 3
-        self.relative_quiescent_kernel_size = 0.15
-        self.relative_quiescent_kernel_sigma = 0.015
-
         # Interferring gene settings
         self.specific_expression_threshold = 0.01
         self.interferring_gene_overlaps = False
         
         # Convolution settings
         self.convolution_limit = 2
-        self.enhancer_convolution_weight = 1
-        self.quiescent_convolution_weight = 1
         self.plateau_threshold = 0.1
         
         # Sequence inserting settings
@@ -101,9 +91,9 @@ class Config:
         self.partial_insertions_per_region = 100
         
         #Temporary Pridict paths
-        self.pridict_image_path = ""
-        self.pridict_path = ""
-        self.pridict_output_path = ""
+        self.pridict_image_path = "" #temp
+        self.pridict_path = "" #temp
+        self.pridict_output_path = "" #temp
 
         # Load config from file
         self.set_config_from_file(path)
