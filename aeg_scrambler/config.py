@@ -86,12 +86,12 @@ class Config:
         self.interferring_gene_overlaps = False
         
         # Convolution settings
-        self.convolution_limit = 2
+        self.convolution_limit = 3
         self.plateau_threshold = 0.1
         
         # Sequence inserting settings
         self.inserted_sequence = "ATAACTTCGTATAATGTACATTATACGAAGTTAT"
-        self.partial_insertions_per_region = 100
+        self.partial_insertions_per_region = 10
         
         #Temporary Pridict paths
         self.pridict_image_path = "" #temp
@@ -100,6 +100,8 @@ class Config:
 
         # Load config from file
         self.set_config_from_file(path)
+        
+        print("Current Config is " + self.unique_id[:14])
 
     def set_config_from_file(self, path) -> None:
         """
@@ -114,11 +116,11 @@ class Config:
                         setattr(self, key, value)
 
         except FileNotFoundError:
-            print("""ERROR: Config file not found.
+            print("""WARN: Config file not found.
             Using default config values instead""")
             print()
         except Exception as e:
-            print(f"""ERROR: Failed to read config file: {e}
+            print(f"""WARN: Failed to read config file: {e}
             Using default config values instead.""")
             print()
     

@@ -197,6 +197,17 @@ class Coordinates:
                 plateau_coordinates, 
                 [convolved_x[-1]]])
             
+            #print(plateau_coordinates)
+            #print(plateau_coordinates[::2])
+            #print(plateau_coordinates[1::2])
+            
+            if plateau_coordinates[0] >= config.plateau_threshold:
+                plateau_coordinates = np.insert(plateau_coordinates, 0, 0, axis = 0)
+            if plateau_coordinates[-1] >= config.plateau_threshold:
+                plateau_coordinates = np.insert(plateau_coordinates, -1, 0, axis = 0) 
+            #If the first value of the plateau coordinates is above the threshold, add another coordinate at the
+            # begining with value 0, if the last value is above the threshold, add a final value with value 0
+            
             self.data.at[index, "Plateau_coordinates"] = plateau_coordinates
             self.data.at[index, "Plateau_starts"] = plateau_coordinates[::2]
             self.data.at[index, "Plateau_ends"] = plateau_coordinates[1::2]
@@ -219,8 +230,10 @@ class Coordinates:
                         str(gene["Enhancer_convolution_x"][0]) + " step=1")
                 f.write("\n")
         
-            convolution_signal = pd.DataFrame({"Convolution_signal" : \
-                self.data.loc[index, "Enhancer_convolution_y"]})
+            convolution_signal = pd.DataFrame({
+                "Convolution_signal" : self.data.loc[
+                    index, "Enhancer_convolution_y"
+                ]})
             convolution_signal.to_csv(
                 (configuration.results_directory +
                  gene["Gene_name"] +
@@ -228,4 +241,5 @@ class Coordinates:
                 sep = "\t", 
                 index = False, 
                 mode = "a", 
-                header = False)
+                header = False
+            )

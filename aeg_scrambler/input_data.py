@@ -46,6 +46,11 @@ class InputData:
         
         pass
     
+    @abstractmethod
+    def export(self, config):
+        """Every derived class must implement this
+        """
+    
 
 class CCLEExpression(InputData):
     
@@ -126,7 +131,6 @@ class CCLEExpression(InputData):
                            gene["Mean"]) / gene["Std"],
             axis = 1
         )
-
 
 class ExperimentalExpression(InputData):
     
@@ -219,7 +223,16 @@ class GeneAnnotations(InputData):
             columns={"Start": "Gene_start", "End": "Gene_end"}, 
             inplace = True
         )
-
+        
+    def export(self, config):
+        
+        self.data.to_csv(
+            config.results_directory + "gene_annotations.bed",
+            sep = "\t",
+            columns = ["Chromosome", "Gene_start", "Gene_end", "Gene_name"]
+        )
+        
+        return config.results_directory + "gene_annotations.bed"
 
 class RegulatoryAnnotations(InputData):
     
@@ -251,3 +264,13 @@ class RegulatoryAnnotations(InputData):
         ]
 
         self.data.drop("Flag", axis = 1)
+        
+    def export(self, config):
+        
+        self.data.to_csv(
+            config.results_directory + "regulatory_annotations.bed",
+            sep = "\t",
+            columns = ["Chromosome", "Start", "End"]
+        )
+        
+        return config.results_directory + "regulatory_annotations.bed"

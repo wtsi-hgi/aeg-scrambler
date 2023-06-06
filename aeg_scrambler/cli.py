@@ -6,12 +6,10 @@ LICENSE file in the root directory of this source tree.
 """
 
 import typer
-import pickle
 import pandas as pd
 from typing import Optional
 from pathlib import Path
 
-from .gradient_descent import GradientDescent
 from .config import Config
 from .input_data import (
     CCLEExpression,
@@ -20,8 +18,10 @@ from .input_data import (
     RegulatoryAnnotations
 )
 from .metrics import Metrics
+from .gradient_descent import GradientDescent
 from .coordinates import Coordinates
 from .sequences import Sequences
+from .tracks import Tracks
 
 app = typer.Typer()
 working_directory = "working/"
@@ -86,10 +86,38 @@ def design(config = None):
 
     print('Finding coordinates...')
     coordinates = Coordinates(config, metrics)
+    coordinates.export_convolutions(config)
 
     print('Finding sequences...')
     sequences = Sequences(config, coordinates)
     
+
+def view(
+    genes,
+    config,
+    gene_annotations,
+    regulatory_annotations,
+    metrics,
+    coordinates,
+    sequences
+    ):
+    
+    metrics, config = load_data_from_config(config)
+
+    print('Finding coordinates...')
+    coordinates = Coordinates(config, metrics)
+
+    print('Finding sequences...')
+    sequences = Sequences(config, coordinates)
+    
+    tracks = Tracks(genes,
+        config,
+        gene_annotations,
+        regulatory_annotations,
+        metrics,
+        coordinates,
+        sequences)
+
 def load_data_from_config(config:str):
     """Loads the data found at the locations specified within the config,
     merges these into a dataframe, and converts this into a Metrics object.

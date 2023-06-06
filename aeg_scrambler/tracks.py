@@ -1,37 +1,37 @@
 import subprocess
-import pygenometracks
+#import pygenometracks
 
 class Tracks:
     
     def __init__(
         self,
-        gene,
+        genes,
         config,
         gene_annotations,
         regulatory_annotations,
-        metrics
+        metrics,
         coordinates,
-        sequences,
-    ):
+        sequences
+        ):
         
-        self.gene = gene
-        self.region = generate_region(gene)
+        self.genes = genes
+        self.region = self.generate_region(self.genes)
+        self.genes = metrics.data
         self.hic = config.hic_path
-        self.gene_annotations = gene_annotations.export_gene_annotations(config) #does not exist yet
-        self.regulatory_annotations = regulatory_annotations.export_regulatory_annotations(config) # does not exist yet
-        self.preferred_insertion_sites = sequences.export_insertion_sites(config) # does not exist yet
-        self.density_convolution = coordinates.export_convolutions(config) # exists!
+        self.gene_annotations = gene_annotations.export(config)
+        self.regulatory_annotations = regulatory_annotations.export(config)
+        self.density_convolution = coordinates.export_convolutions(config)
         self.plateaus = coordinates.export_plateaus(config) # used to exist?
+        self.preferred_insertion_sites = sequences.export_insertion_sites(config) # does not exist yet
         
-    
     def generate_region(self):
         
         """Takes info from metrics dataframe to find region to look at one gene.
         """
         
-        chromosome = metrics.data.loc[metrics.data.loc[metrics.data["Gene_name"] == self.gene]]["Chromosome"]
-        start = metrics.data.loc[metrics.data.loc[metrics.data["Gene_name"] == self.gene]]["Search_window_start"]
-        end = metrics.data.loc[metrics.data.loc[metrics.data["Gene_name"] == self.gene]]["Search_window_end"]
+        chromosome = self.genes.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Chromosome"]
+        start = self.genes.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Search_window_start"]
+        end = self.genes.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Search_window_end"]
         
         return str(chromosome) + ":" + str(start) + "-" + str(end)
     

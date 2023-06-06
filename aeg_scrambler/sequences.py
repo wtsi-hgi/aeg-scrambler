@@ -42,6 +42,15 @@ class Sequences:
         for index, gene in self.coordinates.head(
             config.convolution_limit
         ).iterrows():
+        
+            print(self.coordinates.loc[index, "Plateau_starts"])
+            print(len(self.coordinates.loc[index, "Plateau_starts"]))
+            print(self.coordinates.loc[index, "Plateau_ends"])
+            print(len(self.coordinates.loc[index, "Plateau_ends"]))
+        
+        for index, gene in self.coordinates.head(
+            config.convolution_limit
+        ).iterrows():
 
             plateaus = pd.DataFrame({
                 "Start" : self.coordinates.loc[index, "Plateau_starts"], 
