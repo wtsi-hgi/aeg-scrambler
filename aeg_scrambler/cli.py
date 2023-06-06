@@ -11,7 +11,7 @@ import pandas as pd
 from typing import Optional
 from pathlib import Path
 
-#from .gradientDescent import GradientDescent
+from .gradient_descent import GradientDescent
 from .config import Config
 from .input_data import (
     CCLEExpression,
