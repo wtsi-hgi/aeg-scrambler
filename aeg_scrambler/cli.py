@@ -26,56 +26,33 @@ from .sequences import Sequences
 app = typer.Typer()
 working_directory = "working/"
 
-@app.command()
-def prioritise(dataframe, genes, weights=None, skiprows=56):
-    """
+def load_data_from_config(config:str):
+    """Loads the data found at the locations specified within the config,
+    merges these into a dataframe, and converts this into a Metrics object.
 
-    """
-    if weights is None:
-        weights = [
-            'Scaled_std', 
-            'Scaled_anomalous_score', 
-            'Scaled_enhancer_count', 
-            'Scaled_enhancer_proportion', 
-            'Scaled_specific_gene_expression'
-        ]
+    Args:
+        config - path which points towards the config file location.
 
-    equal_index = dataframe.find('=')
-    dataframe = dataframe[equal_index + 1:]
-
-    equal_index = genes.find('=')
-    genes = [genes[equal_index + 1:]]
-
-    # Read csv file
-    df = pd.read_csv(
-        dataframe,
-        skiprows=int(skiprows),
-        sep='\t'
-    )
-    
-    # Drop first column
-    df = df.drop(df.columns[0], axis=1)
-    
-    model = GradientDescent(df, weights)
-    model.assign_gene_priority(genes)
-    model.optimise_weights()
-
-    print(model.df)
-    return model
-
-@app.command()
-def rank(config = None):    
-    """
-    Ranks the genes.
+    Returns:
+        Metrics - a Metrics object which contains all the merged data found 
+        at the paths specified by the config.
     """
     
     config = Config(config)
     
+    print('Finding CCLE Expression...')
     ccle_expression = CCLEExpression(config)
+
+    print('Finding Experimental Expression...')
     experimental_expression = ExperimentalExpression(config)
+
+    print('Finding Gene Annotations...')
     gene_annotations = GeneAnnotations(config)
+
+    print('Finding Regulatory Annotations...')
     regulatory_annotations = RegulatoryAnnotations(config)
     
+    print('Merging Data...')
     metrics = Metrics(
         config,
         gene_annotations,
@@ -83,39 +60,63 @@ def rank(config = None):
         ccle_expression,
         experimental_expression
     )
+
+    return metrics, config
+
+@app.command()
+def prioritise(config:str, genes:list[str], agnostic:bool):
+    """Given a set of genes of interest, will attempt to reorganise the 
+    dataframe so that these genes will be prioritised and will appear 
+    more towards the top of the dataframe. This means that other genes not 
+    explicitly mentioned, with similar features to those mentioned, will
+    naturally drift towards the top of the dataframe as well
+
+    Args:
+        config - path which points towards the config file location.
+        
+        genes - genes of interest.
+
+        agnostic - if False, the 0th gene of interest will receive more 
+        priority than the 1st, the 1st more so than the 2nd, and so on. 
+        If True, all genes of interest are assigned equal priority.
+
+    Returns:
+        DataFrame - a dataframe with a priority towards those genes of interest.
+    """
+
+    metrics, config = load_data_from_config(config)
+    df = metrics.data
+
+    model = GradientDescent(df, genes, config)
+    model.assign_gene_priority(genes, agnostic)
+    model.optimise_weights()
+
+    print(model.df.head(20))
+    return
+
+@app.command()
+def rank(config = None):    
+    """Ranks the genes based on the weights provided within the config file.
+    
+    Args:
+        config - path which points towards the config file location.
+    """
+    
+    metrics, config = load_data_from_config(config)
+
     print(metrics.printable_ranks())
     metrics.export_gene_scores_report(config)
 
 @app.command()
 def design(config = None):
-    
+    """
+
+    Args:
+        config - path which points towards the config file location.
     """
     
-    """
-    
-    config = Config(config)
-    
-    print('ccle...')
-    ccle_expression = CCLEExpression(config)
-    
-    print('experimental...')
-    experimental_expression = ExperimentalExpression(config)
+    metrics, config = load_data_from_config(config)
 
-    print('gene annotations...')
-    gene_annotations = GeneAnnotations(config)
-
-    print('regulatory annotations...')
-    regulatory_annotations = RegulatoryAnnotations(config)
-    
-    print('Merging metrics...')
-    metrics = Metrics(
-        config,
-        gene_annotations,
-        regulatory_annotations,
-        ccle_expression,
-        experimental_expression
-    )
-    
     print('Finding coordinates...')
     coordinates = Coordinates(config, metrics)
 

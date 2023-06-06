@@ -4,7 +4,9 @@ import hashlib
 
 class Config:
     def __init__(self, path=None) -> None:
-        """Assign default values to configuration variables."""
+        """
+        Assign default values to configuration variables.
+        """
 
         #Assign ID
         self.unique_id = self.assign_unique_id()
@@ -32,7 +34,6 @@ class Config:
         self.experimental_expression_path = reference_dir + "Expression_HAP1_c12.tsv"
         self.reference_genome_path = reference_dir + "genome.fa"
         self.hic_path = ""
-
 
         # Experimental specific settings
         self.cell_line_of_interest = "HAP1"
@@ -118,10 +119,15 @@ class Config:
                 for key, value in settings.items():
                     if hasattr(self, key):
                         setattr(self, key, value)
+
         except FileNotFoundError:
-            print("ERROR: Config file not found.")
+            print("""ERROR: Config file not found.
+            Using default config values instead""")
+            print()
         except Exception as e:
-            print(f"ERROR: Failed to read config file: {e}")
+            print(f"""ERROR: Failed to read config file: {e}
+            Using default config values instead.""")
+            print()
     
     def __str__(self) -> str:
         """
@@ -158,7 +164,9 @@ class Config:
         ]
     
     def get_filters(self) -> list:
-        """Returns the filters associated with the config object."""
+        """
+        Returns the filters associated with the config object.
+        """
     
         return [
             self.std_max,
