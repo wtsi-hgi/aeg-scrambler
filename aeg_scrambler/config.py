@@ -1,6 +1,7 @@
 import json
 import pickle
 import hashlib
+import os
 
 class Config:
     def __init__(self, path=None) -> None:
@@ -22,13 +23,15 @@ class Config:
         }
         
         # File paths
-        reference_dir = "../reference_data/"
-        results_dir = "../results/"
+        reference_dir = "./reference_data/"
+        results_dir = "./results/"
 
         self.results_directory = results_dir
+        if not os.path.exists(self.results_directory):
+            os.mkdir(self.results_directory)
         self.gene_report_directory = results_dir
 
-        self.gene_annotation_path = reference_dir + "Homo_sapiens.GRCh38.109.gtf"
+        self.gene_annotation_path = reference_dir + "Homo_sapiens.GRCh38.108.gtf"
         self.regulatory_elements_path = reference_dir + "HAP1_15_segments.bed"
         self.ccle_expression_path = reference_dir + "CCLE_expressions_22Q4.csv"
         self.experimental_expression_path = reference_dir + "Expression_HAP1_c12.tsv"

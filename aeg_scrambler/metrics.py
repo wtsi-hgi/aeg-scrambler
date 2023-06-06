@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import pyranges as pr
@@ -270,11 +271,12 @@ class Metrics:
         """
         
         scaler = StandardScaler()
-        scaled_genes = self.data.loc[:, (["Gene_name"] +
-                                         self.interesting_features)]
-        scaled_genes.loc[:, self.interesting_features] = \
-            scaler.fit_transform(scaled_genes
-                                 .loc[:, self.interesting_features])
+        scaled_genes = self.data.loc[:, (
+            ["Gene_name"] + self.interesting_features
+        )]
+        scaled_genes.loc[:, self.interesting_features] = scaler.fit_transform(
+            scaled_genes.loc[:, self.interesting_features]
+        )
         
         #for feature in self.interesting_features:
         #    
@@ -417,7 +419,7 @@ class Metrics:
         """
         
         return self.data.loc[
-            :, (["Gene_name"] + self.interesting_features)
+            :, (["Gene_name"] + ["Interest_score"] + self.interesting_features)
         ].head(50)
         
 
@@ -434,31 +436,34 @@ class Metrics:
         
         id = config.unique_id[:14]
         report_path = config.gene_report_directory + \
-            "gene_rankings_" + id + ".txt"
+            "gene_rankings:<" + id + ">.txt"
         
-        
+        open(report_path, "w")
         with open(report_path, "w") as report:
 
             report.write(config.__str__())
             
-        self.data.loc[:, (["Gene_name"] +
-                        ["Interest_score"] + 
-                        self.interesting_features +
-                        ["Scaled_std",
-                        "Scaled_anomalous_score",
-                        "Scaled_enhancer_count",
-                        "Scaled_enhancer_proportion",
-                        "Scaled_specific_gene_expression",
-                        "Scaled_gene_size",
-                        "Scaled_symmetry_ratio",
-                        #"Z-Std",
-                        #"Z-Anomalous_score",
-                        #"Z-Enhancer_count",
-                        #"Z-Enhancer_proportion",
-                        #"Z-Specific_gene_expression",
-                        #"Z-Gene_size",
-                        #"Z-Symmetry_ratio"
-                        ])].to_csv(report_path,
-                                    sep = "\t",
-                                    index = True,
-                                    mode = "a")
+        self.data.loc[:, (
+            ["Gene_name"] +
+            ["Interest_score"] + 
+            self.interesting_features +
+            ["Scaled_std",
+            "Scaled_anomalous_score",
+            "Scaled_enhancer_count",
+            "Scaled_enhancer_proportion",
+            "Scaled_specific_gene_expression",
+            "Scaled_gene_size",
+            "Scaled_symmetry_ratio",
+            #"Z-Std",
+            #"Z-Anomalous_score",
+            #"Z-Enhancer_count",
+            #"Z-Enhancer_proportion",
+            #"Z-Specific_gene_expression",
+            #"Z-Gene_size",
+            #"Z-Symmetry_ratio"
+            ])].to_csv(
+                report_path,
+                sep = "\t",
+                index = True,
+                mode = "a"
+            )
