@@ -93,7 +93,7 @@ class Coordinates:
                 len(convolution_y))))
 
             gene, convolution_x, convolution_y = \
-                self.trim_convolution_ends(gene, convolution_x, convolution_y)
+                self.trim_convolution_ends(gene, config, convolution_x, convolution_y)
 
             self.data.at[index, ("Enhancer_convolution_x")] = \
                 convolution_x
@@ -130,7 +130,7 @@ class Coordinates:
         
         return kernel
 
-    def trim_convolution_ends(self, gene, convolution_x, convolution_y):
+    def trim_convolution_ends(self, gene, config, convolution_x, convolution_y):
         
         """
         Trims the ends of the convolutions 
@@ -140,17 +140,24 @@ class Coordinates:
         upstream_cut_off = gene["Enhancer_step_function_x"][0]
         downstream_cut_off = gene["Enhancer_step_function_x"][-1]
         
-        upstream_cut_off_index = \
-            np.where(convolution_x == upstream_cut_off)
-        downstream_cut_off_index = \
-            np.where(convolution_x == downstream_cut_off)
+        upstream_cut_off_index = np.where(
+            convolution_x == upstream_cut_off
+        )
+        downstream_cut_off_index = np.where(
+            convolution_x == downstream_cut_off
+        )
         
-        convolution_x = \
-            convolution_x[upstream_cut_off_index[0][0]:\
-                downstream_cut_off_index[0][0]]
-        convolution_y = \
-            convolution_y[upstream_cut_off_index[0][0]:\
-                downstream_cut_off_index[0][0]]
+        convolution_x = convolution_x[
+            upstream_cut_off_index[0][0]:downstream_cut_off_index[0][0]
+        ]
+        convolution_y = convolution_y[
+            upstream_cut_off_index[0][0]:downstream_cut_off_index[0][0]
+        ]
+            
+        if convolution_y[0] >= config.plateau_threshold:
+            convolution_y[0] = 0
+        if convolution_y[-1] >= config.plateau_threshold:
+            convolution_y[-1] = 0
         
         return gene, convolution_x, convolution_y
         
@@ -196,17 +203,6 @@ class Coordinates:
                 [[convolved_x[0]], 
                 plateau_coordinates, 
                 [convolved_x[-1]]])
-            
-            #print(plateau_coordinates)
-            #print(plateau_coordinates[::2])
-            #print(plateau_coordinates[1::2])
-            
-            if plateau_coordinates[0] >= config.plateau_threshold:
-                plateau_coordinates = np.insert(plateau_coordinates, 0, 0, axis = 0)
-            if plateau_coordinates[-1] >= config.plateau_threshold:
-                plateau_coordinates = np.insert(plateau_coordinates, -1, 0, axis = 0) 
-            #If the first value of the plateau coordinates is above the threshold, add another coordinate at the
-            # begining with value 0, if the last value is above the threshold, add a final value with value 0
             
             self.data.at[index, "Plateau_coordinates"] = plateau_coordinates
             self.data.at[index, "Plateau_starts"] = plateau_coordinates[::2]
