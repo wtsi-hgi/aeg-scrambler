@@ -8,16 +8,31 @@ class Config:
 
         #Assign ID
         self.unique_id = self.assign_unique_id()
+
+        # Important dataframe columns
+        self.columns = {
+            'Gene_name': str,
+            'Scaled_std': float, 
+            'Scaled_anomalous_score': float, 
+            'Scaled_enhancer_count': float, 
+            'Scaled_enhancer_proportion': float, 
+            'Scaled_specific_gene_expression': float
+        }
         
         # File paths
-        self.results_directory = "../results/"
-        self.gene_report_directory = "../results/"
-        self.gene_annotation_path = ""
-        self.regulatory_elements_path = ""
-        self.ccle_expression_path = ""
-        self.experimental_expression_path = ""
+        reference_dir = "../reference_data/"
+        results_dir = "../results/"
+
+        self.results_directory = results_dir
+        self.gene_report_directory = results_dir
+
+        self.gene_annotation_path = reference_dir + "Homo_sapiens.GRCh38.109.gtf"
+        self.regulatory_elements_path = reference_dir + "HAP1_15_segments.bed"
+        self.ccle_expression_path = reference_dir + "CCLE_expressions_22Q4.csv"
+        self.experimental_expression_path = reference_dir + "Expression_HAP1_c12.tsv"
+        self.reference_genome_path = reference_dir + "genome.fa"
         self.hic_path = ""
-        self.reference_genome_path = ""
+
 
         # Experimental specific settings
         self.cell_line_of_interest = "HAP1"
