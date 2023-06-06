@@ -298,10 +298,8 @@ class Metrics:
                     config.enhancer_proportion_weight +
                 scaled_genes["Specific_gene_expression"] * \
                     config.cell_line_expression_weight +
-                (config.gene_size_weight * \
-                    pow((2), (-scaled_genes["Gene_size"] * \
-                        config.gene_size_weight * \
-                            config.gene_size_weight))) +
+                scaled_genes["Gene_size"] * \
+                    config.gene_size_weight +
                 scaled_genes["Symmetry_ratio"] * \
                     config.symmetry_weight
             )
