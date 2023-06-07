@@ -106,7 +106,7 @@ class Coordinates:
             )
 
             gene, convolution_x, convolution_y = self.trim_convolution_ends(
-                gene, convolution_x, convolution_y
+                gene, config, convolution_x, convolution_y
             )
 
             self.data.at[index, ("Enhancer_convolution_x")] = convolution_x
@@ -143,7 +143,9 @@ class Coordinates:
 
         return kernel
 
-    def trim_convolution_ends(self, gene, convolution_x, convolution_y):
+    def trim_convolution_ends(
+        self, gene, config, convolution_x, convolution_y
+    ):
         """
         Trims the ends of the convolutions which overlap the ends of the step
         functions.
@@ -151,6 +153,23 @@ class Coordinates:
 
         upstream_cut_off = gene["Enhancer_step_function_x"][0]
         downstream_cut_off = gene["Enhancer_step_function_x"][-1]
+
+        upstream_cut_off_index = np.where(convolution_x == upstream_cut_off)
+        downstream_cut_off_index = np.where(
+            convolution_x == downstream_cut_off
+        )
+
+        convolution_x = convolution_x[
+            upstream_cut_off_index[0][0] : downstream_cut_off_index[0][0]
+        ]
+        convolution_y = convolution_y[
+            upstream_cut_off_index[0][0] : downstream_cut_off_index[0][0]
+        ]
+
+        if convolution_y[0] >= config.plateau_threshold:
+            convolution_y[0] = 0
+        if convolution_y[-1] >= config.plateau_threshold:
+            convolution_y[-1] = 0
 
         upstream_cut_off_index = np.where(convolution_x == upstream_cut_off)
         downstream_cut_off_index = np.where(
@@ -223,6 +242,34 @@ class Coordinates:
         for index, gene in self.data.head(
             configuration.convolution_limit
         ).iterrows():
+            with open(
+                (
+                    configuration.results_directory
+                    + gene["Gene_name"]
+                    + "_convolutions.wig"
+                ),
+                "w",
+            ) as f:
+                f.write(
+                    "fixedStep chrom=chr"
+                    + gene["Chromosome"]
+                    + " start="
+                    + str(gene["Enhancer_convolution_x"][0])
+                    + " step=1"
+                )
+                f.write("\n")
+
+            convolution_signal = pd.DataFrame(
+                {
+                    "Convolution_signal": self.data.loc[
+                        index, "Enhancer_convolution_y"
+                    ]
+                }
+            )
+
+        for index, gene in self.data.head(
+            configuration.convolution_limit
+        ).iterrows():
             file_path = Path(configuration.results_dir) / (
                 gene["Gene_name"] + convolutions_ext
             )
@@ -248,5 +295,13 @@ class Coordinates:
             file_path = file_path.resolve()
 
             convolution_signal.to_csv(
-                file_path, sep="\t", index=False, mode="a", header=False
+                (
+                    configuration.results_directory
+                    + gene["Gene_name"]
+                    + "_convolutions.wig"
+                ),
+                sep="\t",
+                index=False,
+                mode="a",
+                header=False,
             )

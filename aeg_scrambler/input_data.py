@@ -42,6 +42,10 @@ class InputData:
         Every derived class must implement this
         """
 
+    @abstractmethod
+    def export(self, config):
+        """Every derived class must implement this"""
+
 
 class CCLEExpression(InputData):
     def load(self, config: Config) -> pd.DataFrame:
@@ -221,6 +225,15 @@ class GeneAnnotations(InputData):
             columns={"Start": "Gene_start", "End": "Gene_end"}, inplace=True
         )
 
+    def export(self, config):
+        self.data.to_csv(
+            config.results_directory + "gene_annotations.bed",
+            sep="\t",
+            columns=["Chromosome", "Gene_start", "Gene_end", "Gene_name"],
+        )
+
+        return config.results_directory + "gene_annotations.bed"
+
 
 class RegulatoryAnnotations(InputData):
     def load(self, config) -> None:
@@ -249,3 +262,12 @@ class RegulatoryAnnotations(InputData):
         self.data = self.data[self.data["Flag"].isin(config.flags_of_interest)]
 
         self.data.drop("Flag", axis=1)
+
+        def export(self, config):
+            self.data.to_csv(
+                config.results_directory + "regulatory_annotations.bed",
+                sep="\t",
+                columns=["Chromosome", "Start", "End"],
+            )
+
+        return config.results_directory + "regulatory_annotations.bed"

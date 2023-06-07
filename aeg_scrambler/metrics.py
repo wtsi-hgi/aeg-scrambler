@@ -23,6 +23,15 @@ class Metrics:
             "Gene_size",
             "Symmetry_ratio",
         ]
+        self.interesting_features = [
+            "Std",
+            "Anomalous_score",
+            "Enhancer_count",
+            "Enhancer_proportion",
+            "Specific_gene_expression",
+            "Gene_size",
+            "Symmetry_ratio",
+        ]
         self.regulatory_data = regulatory_element_annotations.data
         self.merge_genetic_data(
             gene_annotations, ccle_expression, experimental_expression

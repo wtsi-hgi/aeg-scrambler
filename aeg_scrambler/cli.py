@@ -18,6 +18,7 @@ from .input_data import (
 )
 from .metrics import Metrics
 from .sequences import Sequences
+from .tracks import Tracks
 
 app = typer.Typer()
 working_directory = "working/"
@@ -85,9 +86,38 @@ def design(config=None):
 
     print('Finding coordinates...')
     coordinates = Coordinates(config, metrics)
+    coordinates.export_convolutions(config)
 
     print('Finding sequences...')
     Sequences(config, coordinates)
+
+
+def view(
+    genes,
+    config,
+    gene_annotations,
+    regulatory_annotations,
+    metrics,
+    coordinates,
+    sequences,
+):
+    metrics, config = load_data_from_config(config)
+
+    print('Finding coordinates...')
+    coordinates = Coordinates(config, metrics)
+
+    print('Finding sequences...')
+    sequences = Sequences(config, coordinates)
+
+    tracks = Tracks(
+        genes,
+        config,
+        gene_annotations,
+        regulatory_annotations,
+        metrics,
+        coordinates,
+        sequences,
+    )
 
 
 def load_data_from_config(config: str):
