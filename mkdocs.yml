@@ -4,12 +4,15 @@ repo_url: https://github.com/wtsi-hgi/aeg-scrambler
 repo_name: wtsi-hgi/aeg-scrambler
 #strict: true
 nav:
-  - Home: index.md
-  - Installation: installation.md
-  - Usage: usage.md
-  - Modules: api.md
-  - Contributing: contributing.md
-  - Changelog: changelog.md
+  - index.md
+  - installation.md
+  - introduction.md
+  - configuration.md
+  - commands.md
+  - usage.md
+  - api.md
+  - contributing.md
+  - changelog.md
 theme:
   name: material
   language: en
