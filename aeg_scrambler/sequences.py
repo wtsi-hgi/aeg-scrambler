@@ -33,7 +33,8 @@ class Sequences:
         os.rmdir(self.working_directory)
 
     def iterate_plateaus_for_each_gene(self, config):
-        """Iterates through each gene, and applies methods to the gene-associated plateaus as necessary.
+        """Iterates through each gene, and applies methods
+        to the gene-associated plateaus as necessary.
 
         args:
             config
