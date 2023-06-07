@@ -1,8 +1,7 @@
 import subprocess
-#import pygenometracks
+
 
 class Tracks:
-    
     def __init__(
         self,
         genes,
@@ -11,9 +10,8 @@ class Tracks:
         regulatory_annotations,
         metrics,
         coordinates,
-        sequences
-        ):
-        
+        sequences,
+    ):
         self.genes = genes
         self.metrics = metrics.data
         self.hic = config.hic_path
@@ -37,21 +35,23 @@ class Tracks:
             region = self.generate_region(gene)
         
     def generate_region(self):
-        
-        """Takes info from metrics dataframe to find region to look at one gene.
-        """
-        
-        chromosome = self.metrics.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Chromosome"]
-        start = self.metrics.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Search_window_start"]
-        end = self.metrics.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Search_window_end"]
-        
+        """Takes info from metrics dataframe to find region to look at one gene."""
+
+        chromosome = self.genes.loc[
+            self.genes.loc[self.genes["Gene_name"] == self.gene]
+        ]["Chromosome"]
+        start = self.genes.loc[
+            self.genes.loc[self.genes["Gene_name"] == self.gene]
+        ]["Search_window_start"]
+        end = self.genes.loc[
+            self.genes.loc[self.genes["Gene_name"] == self.gene]
+        ]["Search_window_end"]
+
         return str(chromosome) + ":" + str(start) + "-" + str(end)
-    
+
     def generate_track_config(self):
-        
-        """Writes file which PyGenomeTracks can then read.
-        """
-        
+        """Writes file which PyGenomeTracks can then read."""
+
         tracks_config = open("tracks.ini", "w")
         tracks_config.write("[HiC data]\n")
         tracks_config.write("file = " + self.hic + "\n")
@@ -68,17 +68,17 @@ class Tracks:
         tracks_config.write("[Enhancers]\n")
         tracks_config.write("file = " + self.regulatory_anotations + "\n")
         tracks_config.write("title = Enhancers\n")
-        
+
     def generate_track_image(self):
-        
-        """Runs PyGenomeTracks.
-        """
-        
-        subprocess.run([
+        """Runs PyGenomeTracks."""
+
+        subprocess.run(
+            [
                 "pyGenomeTracks",
                 "--tracks",
                 "tracks.ini",
                 "--input-fname",
                 "--region",
                 self.region,
-            ])
+            ]
+        )

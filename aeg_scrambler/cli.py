@@ -6,58 +6,57 @@ LICENSE file in the root directory of this source tree.
 """
 
 import typer
-import pandas as pd
-from typing import Optional
-from pathlib import Path
 
 from .config import Config
+from .coordinates import Coordinates
+from .gradient_descent import GradientDescent
 from .input_data import (
     CCLEExpression,
     ExperimentalExpression,
     GeneAnnotations,
-    RegulatoryAnnotations
+    RegulatoryAnnotations,
 )
 from .metrics import Metrics
-from .gradient_descent import GradientDescent
-from .coordinates import Coordinates
 from .sequences import Sequences
 from .tracks import Tracks
 
 app = typer.Typer()
 working_directory = "working/"
 
+
 def main():
-    
     app()
 
+
 @app.command()
-def rank(config = None):    
+def rank(config=None):
     """Ranks the genes based on the weights provided within the config file.
-    
+
     Args:
         config - path which points towards the config file location.
     """
-    
+
     metrics, config = load_data_from_config(config)
 
     print(metrics.printable_ranks())
     metrics.export_gene_scores_report(config)
 
+
 @app.command()
-def tune(config:str, genes:list[str], agnostic:bool):
-    """Given a set of genes of interest, will attempt to reorganise the 
-    dataframe so that these genes will be prioritised and will appear 
-    more towards the top of the dataframe. This means that other genes not 
+def tune(config: str, genes: list[str], agnostic: bool):
+    """Given a set of genes of interest, will attempt to reorganise the
+    dataframe so that these genes will be prioritised and will appear
+    more towards the top of the dataframe. This means that other genes not
     explicitly mentioned, with similar features to those mentioned, will
     naturally drift towards the top of the dataframe as well
 
     Args:
         config - path which points towards the config file location.
-        
+
         genes - genes of interest.
 
-        agnostic - if False, the 0th gene of interest will receive more 
-        priority than the 1st, the 1st more so than the 2nd, and so on. 
+        agnostic - if False, the 0th gene of interest will receive more
+        priority than the 1st, the 1st more so than the 2nd, and so on.
         If True, all genes of interest are assigned equal priority.
 
     Returns:
@@ -74,14 +73,15 @@ def tune(config:str, genes:list[str], agnostic:bool):
     print(model.df.head(20))
     return
 
+
 @app.command()
-def design(config = None):
+def design(config=None):
     """
 
     Args:
         config - path which points towards the config file location.
     """
-    
+
     metrics, config = load_data_from_config(config)
 
     print('Finding coordinates...')
@@ -89,8 +89,8 @@ def design(config = None):
     coordinates.export_convolutions(config)
 
     print('Finding sequences...')
-    sequences = Sequences(config, coordinates)
-    
+    Sequences(config, coordinates)
+
 
 def view(
     genes,
@@ -99,9 +99,8 @@ def view(
     regulatory_annotations,
     metrics,
     coordinates,
-    sequences
-    ):
-    
+    sequences,
+):
     metrics, config = load_data_from_config(config)
 
     print('Finding coordinates...')
@@ -109,16 +108,19 @@ def view(
 
     print('Finding sequences...')
     sequences = Sequences(config, coordinates)
-    
-    tracks = Tracks(genes,
+
+    tracks = Tracks(
+        genes,
         config,
         gene_annotations,
         regulatory_annotations,
         metrics,
         coordinates,
-        sequences)
+        sequences,
+    )
 
-def load_data_from_config(config:str):
+
+def load_data_from_config(config: str):
     """Loads the data found at the locations specified within the config,
     merges these into a dataframe, and converts this into a Metrics object.
 
@@ -126,12 +128,12 @@ def load_data_from_config(config:str):
         config - path which points towards the config file location.
 
     Returns:
-        Metrics - a Metrics object which contains all the merged data found 
+        Metrics - a Metrics object which contains all the merged data found
         at the paths specified by the config.
     """
-    
+
     config = Config(config)
-    
+
     print('Finding CCLE Expression...')
     ccle_expression = CCLEExpression(config)
 
@@ -143,17 +145,18 @@ def load_data_from_config(config:str):
 
     print('Finding Regulatory Annotations...')
     regulatory_annotations = RegulatoryAnnotations(config)
-    
+
     print('Merging Data...')
     metrics = Metrics(
         config,
         gene_annotations,
         regulatory_annotations,
         ccle_expression,
-        experimental_expression
+        experimental_expression,
     )
 
     return metrics, config
-    
+
+
 if __name__ == "__main__":
     main()
