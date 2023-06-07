@@ -34,6 +34,7 @@ pyyaml = "^6.0"
 torch = "^2.0.1"
 pyfaidx = "^0.7.2.1"
 numpy = "^1.24.3"
+viennarna = "^2.5.0a5"
 
 [tool.poetry.group.dev]
 optional = true

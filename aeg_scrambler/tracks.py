@@ -15,23 +15,35 @@ class Tracks:
         ):
         
         self.genes = genes
-        self.region = self.generate_region(self.genes)
-        self.genes = metrics.data
+        self.metrics = metrics.data
         self.hic = config.hic_path
         self.gene_annotations = gene_annotations.export(config)
         self.regulatory_annotations = regulatory_annotations.export(config)
+        
+        self.iterate_genes(self.genes)
+        
+        
+        
+        
+        
         self.density_convolution = coordinates.export_convolutions(config)
-        self.plateaus = coordinates.export_plateaus(config) # used to exist?
+        self.plateaus = coordinates.export_plateaus(config)
         self.preferred_insertion_sites = sequences.export_insertion_sites(config) # does not exist yet
+        
+    def iterate_genes(self, genes):
+        
+        for gene in genes:
+            
+            region = self.generate_region(gene)
         
     def generate_region(self):
         
         """Takes info from metrics dataframe to find region to look at one gene.
         """
         
-        chromosome = self.genes.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Chromosome"]
-        start = self.genes.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Search_window_start"]
-        end = self.genes.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Search_window_end"]
+        chromosome = self.metrics.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Chromosome"]
+        start = self.metrics.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Search_window_start"]
+        end = self.metrics.loc[self.genes.loc[self.genes["Gene_name"] == self.gene]]["Search_window_end"]
         
         return str(chromosome) + ":" + str(start) + "-" + str(end)
     

@@ -152,7 +152,7 @@ class Sequences:
                         
                         plateau_specific_output = pd.DataFrame()
                         
-                        for insertion in self.plateau_specific_insertions["sequence_name"]:
+                        for insertion in plateau_specific_insertions["sequence_name"]:
             
                             pridict_output = self.read_pridict_output(
                                 insertion

@@ -210,16 +210,19 @@ class Coordinates:
             
             self.data.drop(["Plateau_coordinates"], axis = 1)
             
-    def export_convolutions(self, configuration):
+    def export_convolutions(self, config):
     
         """
         Coordinates of convolutions are exported to wig file, for each gene
         """
         
         for index, gene in \
-            self.data.head(configuration.convolution_limit).iterrows():
-            with open((configuration.results_directory +
-                gene["Gene_name"] + "_convolutions.wig"), "w") as f:
+            self.data.head(config.convolution_limit).iterrows():
+                
+            id = config.unique_id[:14]
+            convolution_path = f"{config.results_directory} convolution:<{id}><{gene.Gene_name}>.wig"
+                
+            with open((convolution_path), "w") as f:
                 
                 f.write("fixedStep chrom=chr" +
                     gene["Chromosome"] + " start=" +
@@ -230,10 +233,8 @@ class Coordinates:
                 "Convolution_signal" : self.data.loc[
                     index, "Enhancer_convolution_y"
                 ]})
-            convolution_signal.to_csv(
-                (configuration.results_directory +
-                 gene["Gene_name"] +
-                 "_convolutions.wig"), 
+            convolution_signal.to_csv((
+                convolution_path), 
                 sep = "\t", 
                 index = False, 
                 mode = "a", 
