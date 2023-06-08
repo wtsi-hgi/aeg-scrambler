@@ -9,7 +9,7 @@ import typer
 
 from .config import Config
 from .coordinates import Coordinates
-from .gradient_descent import GradientDescent
+#from .gradient_descent import GradientDescent
 from .input_data import (
     CCLEExpression,
     ExperimentalExpression,

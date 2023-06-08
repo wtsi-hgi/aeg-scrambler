@@ -151,6 +151,8 @@ class Coordinates:
         functions.
         """
 
+        print(gene["Gene_name"], "is being trimmed")
+
         upstream_cut_off = gene["Enhancer_step_function_x"][0]
         downstream_cut_off = gene["Enhancer_step_function_x"][-1]
 
@@ -170,18 +172,6 @@ class Coordinates:
             convolution_y[0] = 0
         if convolution_y[-1] >= config.plateau_threshold:
             convolution_y[-1] = 0
-
-        upstream_cut_off_index = np.where(convolution_x == upstream_cut_off)
-        downstream_cut_off_index = np.where(
-            convolution_x == downstream_cut_off
-        )
-
-        convolution_x = convolution_x[
-            upstream_cut_off_index[0][0] : downstream_cut_off_index[0][0]
-        ]
-        convolution_y = convolution_y[
-            upstream_cut_off_index[0][0] : downstream_cut_off_index[0][0]
-        ]
 
         return gene, convolution_x, convolution_y
 
@@ -234,17 +224,17 @@ class Coordinates:
 
             self.data.drop(["Plateau_coordinates"], axis=1)
 
-    def export_convolutions(self, configuration):
+    def export_convolutions(self, config):
         """
         Coordinates of convolutions are exported to wig file, for each gene
         """
 
         for index, gene in self.data.head(
-            configuration.convolution_limit
+            config.convolution_limit
         ).iterrows():
             with open(
                 (
-                    configuration.results_directory
+                    config.results_directory
                     + gene["Gene_name"]
                     + "_convolutions.wig"
                 ),
@@ -280,9 +270,9 @@ class Coordinates:
             )
 
         for index, gene in self.data.head(
-            configuration.convolution_limit
+            config.convolution_limit
         ).iterrows():
-            file_path = Path(configuration.results_dir) / (
+            file_path = Path(config.results_dir) / (
                 gene["Gene_name"] + convolutions_ext
             )
 
@@ -300,7 +290,7 @@ class Coordinates:
                 }
             )
 
-            file_path = Path(configuration.results_directory) / (
+            file_path = Path(config.results_directory) / (
                 gene["Gene_name"] + convolutions_ext
             )
 
@@ -308,7 +298,7 @@ class Coordinates:
 
             convolution_signal.to_csv(
                 (
-                    configuration.results_directory
+                    config.results_directory
                     + gene["Gene_name"]
                     + "_convolutions.wig"
                 ),
