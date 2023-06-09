@@ -1,4 +1,5 @@
 import subprocess
+#import pygenometracks
 
 
 class Tracks:
@@ -19,11 +20,6 @@ class Tracks:
         self.regulatory_annotations = regulatory_annotations.export(config)
         
         self.iterate_genes(self.genes)
-        
-        
-        
-        
-        
         self.density_convolution = coordinates.export_convolutions(config)
         self.plateaus = coordinates.export_plateaus(config)
         self.preferred_insertion_sites = sequences.export_insertion_sites(config) # does not exist yet
@@ -34,7 +30,7 @@ class Tracks:
             
             region = self.generate_region(gene)
         
-    def generate_region(self):
+    def generate_region(self, gene):
         """Takes info from metrics dataframe to find region to look at one gene."""
 
         chromosome = self.genes.loc[

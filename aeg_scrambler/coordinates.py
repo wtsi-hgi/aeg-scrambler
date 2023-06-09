@@ -272,7 +272,7 @@ class Coordinates:
         for index, gene in self.data.head(
             config.convolution_limit
         ).iterrows():
-            file_path = Path(config.results_dir) / (
+            file_path = Path(config.results_directory) / (
                 gene["Gene_name"] + convolutions_ext
             )
 

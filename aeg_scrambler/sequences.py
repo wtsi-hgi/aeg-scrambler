@@ -17,6 +17,8 @@ class Sequences:
 
         self.pridict_image_path = config.pridict_image_path
         self.pridict_path = config.pridict_path
+        self.pridict_output_path = config.pridict_output_path
+        self.results_directory = config.results_directory
 
         self.hashkey = str(hash(self))
         self.working_directory = "./working/" + self.hashkey + "/"
@@ -39,14 +41,6 @@ class Sequences:
         args:
             config
         """
-
-        for index, gene in self.coordinates.head(
-            config.convolution_limit
-        ).iterrows():
-            print(self.coordinates.loc[index, "Plateau_starts"])
-            print(len(self.coordinates.loc[index, "Plateau_starts"]))
-            print(self.coordinates.loc[index, "Plateau_ends"])
-            print(len(self.coordinates.loc[index, "Plateau_ends"]))
 
         for index, gene in self.coordinates.head(
             config.convolution_limit
@@ -151,25 +145,38 @@ class Sequences:
 
                     plateau_specific_output = pd.DataFrame()
 
-                    for insertion in self.plateau_specific_insertions[
+                    for insertion in plateau_specific_insertions[
                         "sequence_name"
                     ]:
-                        pridict_output = self.read_pridict_output(insertion)
-                        pridict_output = self.clean_pridict_output(
-                            pridict_output
-                        )
-                        plateau_specific_output = pd.concat(
-                            [plateau_specific_output, pridict_output.head(1)],
-                            axis=0,
-                            ignore_index=True,
-                        )
+                        pridict_output_path = self.pridict_output_path + insertion + "_pegRNA_Pridict_full.csv"
+                        print(pridict_output_path)
+                        print(os.path.isfile(pridict_output_path))
+                        
+                        if os.path.isfile(pridict_output_path):
+                            
+                            pridict_output = self.read_pridict_output(
+                                pridict_output_path
+                            )
+                            pridict_output = self.clean_pridict_output(
+                                pridict_output
+                            )
+                            
+                            print(pridict_output)
+                            
+                            plateau_specific_output = pd.concat(
+                                [plateau_specific_output, pridict_output.head(1)],
+                                axis=0,
+                                ignore_index=True,
+                            )
+                            
+                            print(plateau_specific_output)
 
-                        plateau_specific_output.to_csv(
-                            self.results_directory
-                            + plateau["Plateau_name"]
-                            + "_suggested_insertions.tsv",
-                            sep="\t",
-                        )
+                    plateau_specific_output.to_csv(
+                        self.results_directory
+                        + plateau["Plateau_name"]
+                        + "_suggested_insertions.tsv",
+                        sep="\t",
+                    )
 
                     break
 
@@ -286,6 +293,9 @@ class Sequences:
 
         subprocess.run(
             [
+                # This is all temporary and subject to change based on
+                # singularity container implementation
+                
                 "singularity",
                 "exec",
                 "--bind",
@@ -293,16 +303,16 @@ class Sequences:
                 self.pridict_image_path,
                 self.pridict_path,
                 "batch",
-                "--input-fname",
-                self.working_directory + "sequences_for_pridict.csv",
-                "--output-fname",
-                "sequences_from_pridict",
-                "--output-dir",
+                "--input-dir",
                 self.working_directory,
+                "--input-fname",
+                "sequences_for_pridict.csv",
+                "--output-dir",
+                self.pridict_output_path,
             ]
         )
 
-    def read_pridict_output(self, insertion_name):
+    def read_pridict_output(self, pridict_output_path):
         """Generates a dataframe from the csv produced by PRIDICT.
 
         args:
@@ -312,11 +322,11 @@ class Sequences:
             pridict_output
         """
 
-        pridict_output_path = (
-            self.working_directory
-            + insertion_name
-            + "_pegRNA_Pridict_full.csv"
-        )
+        #pridict_output_path = (
+        #    self.working_directory
+        #    + insertion_name
+        #    + "_pegRNA_Pridict_full.csv"
+        #)
         pridict_output = pd.read_csv(pridict_output_path)
 
         os.remove(pridict_output_path)
@@ -334,10 +344,14 @@ class Sequences:
         """
 
         pridict_output.drop(
-            [["Original_sequences", "Edited_sequences"]], axis=1, inplace=True
+            ["Original_Sequence", "Edited-Sequences"], axis=1, inplace=True
         )
-        pridict_output = pridict_output[self.output["Editing_Position"] >= 10]
+        pridict_output = pridict_output[
+            pridict_output["Editing_Position"] >= 10
+        ]
         pridict_output = pridict_output.sort_values(
-            "PRIDICT_editing_Score_deep", ascending=False
+            "PRIDICT_editing_Score_deep",
+            ascending=False
         ).reset_index()
+        
         return pridict_output
