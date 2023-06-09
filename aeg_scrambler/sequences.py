@@ -19,6 +19,7 @@ class Sequences:
         self.pridict_path = config.pridict_path
         self.pridict_output_path = config.pridict_output_path
         self.results_directory = config.results_directory
+        self.id = config.unique_id[:14]
 
         self.hashkey = str(hash(self))
         self.working_directory = "./working/" + self.hashkey + "/"
@@ -78,6 +79,18 @@ class Sequences:
             + str(int(plateau["Start"]))
             + "-"
             + str(int(plateau["End"]))
+        )
+
+    def export_plateaus(self, gene, plateaus):
+
+        plateaus_path = f"{self.results_directory}Plateaus:<{self.id}><{gene.Gene_name}>.bed"
+
+        plateaus.to_csv(
+            plateaus_path,
+            columns = ["Chromosome", "Start", "End", "Plateau_name", "Strand"],
+            index=False,
+            header=True,
+            sep="\t"
         )
 
     def find_fasta(self, plateaus, config):
@@ -171,11 +184,12 @@ class Sequences:
                             
                             print(plateau_specific_output)
 
+                    id = self.id
+                    insertions_path = f"{self.results_directory}Suggested_insertions:<{id}><{plateau.Plateau_name}>.tsv"
+
                     plateau_specific_output.to_csv(
-                        self.results_directory
-                        + plateau["Plateau_name"]
-                        + "_suggested_insertions.tsv",
-                        sep="\t",
+                        insertions_path,
+                        sep="\t"
                     )
 
                     break

@@ -232,35 +232,19 @@ class Coordinates:
         for index, gene in self.data.head(
             config.convolution_limit
         ).iterrows():
-            with open(
-                (
-                    config.results_directory
-                    + gene["Gene_name"]
-                    + "_convolutions.wig"
-                ),
-                "w",
-            ) as f:
-                f.write(
+            
+            id = config.unique_id[:14]
+            convolution_path = f"{config.results_directory}Convolution:<{id}><{gene.Gene_name}>.wig"
+            
+            with open(convolution_path, "w") as convolution_file:
+                convolution_file.write(
                     "fixedStep chrom=chr"
                     + gene["Chromosome"]
                     + " start="
                     + str(gene["Enhancer_convolution_x"][0])
-                    + " step=1"
+                    + " step=1\n"
                 )
         
-        for index, gene in \
-            self.data.head(config.convolution_limit).iterrows():
-                
-            id = config.unique_id[:14]
-            convolution_path = f"{config.results_directory} convolution:<{id}><{gene.Gene_name}>.wig"
-                
-            with open((convolution_path), "w") as f:
-                
-                f.write("fixedStep chrom=chr" +
-                    gene["Chromosome"] + " start=" +
-                        str(gene["Enhancer_convolution_x"][0]) + " step=1")
-                f.write("\n")
-
             convolution_signal = pd.DataFrame(
                 {
                     "Convolution_signal": self.data.loc[
@@ -268,40 +252,9 @@ class Coordinates:
                     ]
                 }
             )
-
-        for index, gene in self.data.head(
-            config.convolution_limit
-        ).iterrows():
-            file_path = Path(config.results_directory) / (
-                gene["Gene_name"] + convolutions_ext
-            )
-
-            with open(file_path, "w") as f:
-                f.write(
-                    f"fixedStep chrom=chr{gene['Chromosome']} \
-                        start={gene['Enhancer_convolution_x'][0]} step=1\n"
-                )
-
-            convolution_signal = pd.DataFrame(
-                {
-                    "Convolution_signal": self.data.loc[
-                        index, "Enhancer_convolution_y"
-                    ]
-                }
-            )
-
-            file_path = Path(config.results_directory) / (
-                gene["Gene_name"] + convolutions_ext
-            )
-
-            file_path = file_path.resolve()
 
             convolution_signal.to_csv(
-                (
-                    config.results_directory
-                    + gene["Gene_name"]
-                    + "_convolutions.wig"
-                ),
+                convolution_path,
                 sep="\t",
                 index=False,
                 mode="a",

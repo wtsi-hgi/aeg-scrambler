@@ -465,9 +465,7 @@ class Metrics:
         """
 
         id = config.unique_id[:14]
-        report_path = (
-            config.gene_report_directory + "gene_rankings:<" + id + ">.txt"
-        )
+        report_path = f"{config.gene_report_directory}Gene_rankings:<{id}>.tsv"
 
         open(report_path, "w")
         with open(report_path, "w") as report:
