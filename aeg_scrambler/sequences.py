@@ -169,14 +169,15 @@ class Sequences:
                             pridict_output = self.read_pridict_output(
                                 pridict_output_path
                             )
-                            pridict_output = self.clean_pridict_output(
-                                pridict_output
-                            )
                             
                             plateau_specific_output = pd.concat(
                                 [plateau_specific_output, pridict_output],
                                 axis=0,
                                 ignore_index=True,
+                            )
+
+                    plateau_specific_output = self.clean_pridict_output(
+                                plateau_specific_output
                             )
 
                     id = self.id
@@ -369,9 +370,9 @@ class Sequences:
             "PRIDICT_editing_Score_deep",
             ascending=False
         )
-        pridict_output[
-            pridict_output.columns[-1:].union(pridict_output.columns[:-1],
-                                              sort=False)
-        ]
+        #pridict_output[
+        #    pridict_output.columns[-1:].union(pridict_output.columns[:-1],
+        #                                      sort=False)
+        #]
         
         return pridict_output
