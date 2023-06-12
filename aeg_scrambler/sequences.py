@@ -60,6 +60,7 @@ class Sequences:
             plateaus["Plateau_name"] = plateaus.apply(
                 self.name_plateau, axis=1
             )
+            self.export_plateaus(gene, plateaus)
             plateaus = self.find_fasta(plateaus, config)
             plateaus.apply(self.pridict_each_plateau, axis=1)
 
@@ -75,7 +76,7 @@ class Sequences:
 
         return (
             str(plateau["Gene_name"])
-            + ":"
+            + "-"
             + str(int(plateau["Start"]))
             + "-"
             + str(int(plateau["End"]))
@@ -83,7 +84,7 @@ class Sequences:
 
     def export_plateaus(self, gene, plateaus):
 
-        plateaus_path = f"{self.results_directory}Plateaus:<{self.id}><{gene.Gene_name}>.bed"
+        plateaus_path = f"{self.results_directory}Plateaus<{self.id}><{gene.Gene_name}>.bed"
 
         plateaus.to_csv(
             plateaus_path,
@@ -162,8 +163,6 @@ class Sequences:
                         "sequence_name"
                     ]:
                         pridict_output_path = self.pridict_output_path + insertion + "_pegRNA_Pridict_full.csv"
-                        print(pridict_output_path)
-                        print(os.path.isfile(pridict_output_path))
                         
                         if os.path.isfile(pridict_output_path):
                             
@@ -174,23 +173,24 @@ class Sequences:
                                 pridict_output
                             )
                             
-                            print(pridict_output)
-                            
                             plateau_specific_output = pd.concat(
-                                [plateau_specific_output, pridict_output.head(1)],
+                                [plateau_specific_output, pridict_output],
                                 axis=0,
                                 ignore_index=True,
                             )
-                            
-                            print(plateau_specific_output)
 
                     id = self.id
-                    insertions_path = f"{self.results_directory}Suggested_insertions:<{id}><{plateau.Plateau_name}>.tsv"
+                    all_insertions_path = f"{self.results_directory}All_insertions:<{id}><{plateau.Plateau_name}>.tsv"
+                    #suggested_insertions_path = f"{self.results_directory}Suggested_insertions:<{id}><{plateau.Plateau_name}>.tsv"
 
                     plateau_specific_output.to_csv(
-                        insertions_path,
+                        all_insertions_path,
                         sep="\t"
                     )
+                    #plateau_specific_output.head(1).to_csv(
+                    #    suggested_insertions_path,
+                    #    sep="\t"
+                    #)
 
                     break
 
@@ -341,7 +341,9 @@ class Sequences:
         #    + insertion_name
         #    + "_pegRNA_Pridict_full.csv"
         #)
-        pridict_output = pd.read_csv(pridict_output_path)
+        pridict_output = pd.read_csv(
+            pridict_output_path,
+            index_col=0)
 
         os.remove(pridict_output_path)
 
@@ -361,11 +363,15 @@ class Sequences:
             ["Original_Sequence", "Edited-Sequences"], axis=1, inplace=True
         )
         pridict_output = pridict_output[
-            pridict_output["Editing_Position"] >= 10
+            pridict_output["Editing_Position"] < 10
         ]
         pridict_output = pridict_output.sort_values(
             "PRIDICT_editing_Score_deep",
             ascending=False
-        ).reset_index()
+        )
+        pridict_output[
+            pridict_output.columns[-1:].union(pridict_output.columns[:-1],
+                                              sort=False)
+        ]
         
         return pridict_output

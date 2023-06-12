@@ -49,7 +49,8 @@ class Coordinates:
         """
 
         step_function = np.zeros(
-            len(row['Enhancer_step_function_x']), dtype=int
+            len(row['Enhancer_step_function_x']),
+            dtype=int
         )
         overlapping_elements = self.overlaps.loc[
             self.overlaps["Gene_name"] == row["Gene_name"]
@@ -234,7 +235,7 @@ class Coordinates:
         ).iterrows():
             
             id = config.unique_id[:14]
-            convolution_path = f"{config.results_directory}Convolution:<{id}><{gene.Gene_name}>.wig"
+            convolution_path = f"{config.results_directory}Convolution<{id}><{gene.Gene_name}>.wig"
             
             with open(convolution_path, "w") as convolution_file:
                 convolution_file.write(
