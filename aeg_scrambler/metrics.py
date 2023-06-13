@@ -465,7 +465,7 @@ class Metrics:
         """
 
         id = config.unique_id[:14]
-        report_path = f"{config.results_directory}Gene_rankings<{id}>.tsv"
+        report_path = f"{config.results_directory}Gene_rankings.{id}.tsv"
 
         open(report_path, "w")
         with open(report_path, "w") as report:

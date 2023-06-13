@@ -84,7 +84,7 @@ class Sequences:
 
     def export_plateaus(self, gene, plateaus):
 
-        plateaus_path = f"{self.results_directory}Plateaus<{self.id}><{gene.Gene_name}>.bed"
+        plateaus_path = f"{self.results_directory}Plateaus.{self.id}.{gene.Gene_name}.bed"
 
         plateaus.to_csv(
             plateaus_path,
@@ -181,8 +181,8 @@ class Sequences:
                             )
 
                     id = self.id
-                    all_insertions_path = f"{self.results_directory}All_insertions:<{id}><{plateau.Plateau_name}>.tsv"
-                    #suggested_insertions_path = f"{self.results_directory}Suggested_insertions:<{id}><{plateau.Plateau_name}>.tsv"
+                    all_insertions_path = f"{self.results_directory}All_insertions.{id}.{plateau.Plateau_name}.tsv"
+                    #suggested_insertions_path = f"{self.results_directory}Suggested_insertions.{id}.{plateau.Plateau_name}.tsv"
 
                     plateau_specific_output.to_csv(
                         all_insertions_path,

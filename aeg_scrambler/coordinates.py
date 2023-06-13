@@ -235,7 +235,7 @@ class Coordinates:
         ).iterrows():
             
             id = config.unique_id[:14]
-            convolution_path = f"{config.results_directory}Convolution<{id}><{gene.Gene_name}>.wig"
+            convolution_path = f"{config.results_directory}Convolution.{id}.{gene.Gene_name}>.wig"
             
             with open(convolution_path, "w") as convolution_file:
                 convolution_file.write(
