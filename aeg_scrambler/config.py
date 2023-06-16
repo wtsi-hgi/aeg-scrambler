@@ -42,6 +42,7 @@ class Config:
         self.hic_path = reference_dir + "4DNFI1E6NJQJ.hic"
 
         # Experimental specific settings
+        self.genes_of_interest = False
         self.cell_line_of_interest = "HAP1"
         self.chromosomes_of_interest = [str(i) for i in range(23)] + ['X', 'Y']
         self.flags_of_interest = ["E11"]

@@ -43,9 +43,16 @@ class Sequences:
             config
         """
 
-        for index, gene in self.coordinates.head(
-            config.convolution_limit
-        ).iterrows():
+        if config.genes_of_interest is not False:
+            processed_data = self.coordinates[self.coordinates["Gene_name"].isin(
+                config.genes_of_interest
+            )]
+        else:
+            processed_data = self.coordinates.head(config.convolution_limit)
+
+        print("*****************", processed_data, "*********************")
+
+        for index, gene in processed_data.iterrows():
             plateaus = pd.DataFrame(
                 {
                     "Start": self.coordinates.loc[index, "Plateau_starts"],
@@ -84,7 +91,7 @@ class Sequences:
 
     def export_plateaus(self, gene, plateaus):
 
-        plateaus_path = f"{self.results_directory}Plateaus.{self.id}.{gene.Gene_name}.bed"
+        plateaus_path = f"{self.results_directory}plateaus.{self.id.lower()}.{gene.Gene_name}.bed"
 
         plateaus.to_csv(
             plateaus_path,
@@ -181,7 +188,7 @@ class Sequences:
                             )
 
                     id = self.id
-                    all_insertions_path = f"{self.results_directory}All_insertions.{id}.{plateau.Plateau_name}.tsv"
+                    all_insertions_path = f"{self.results_directory}all_insertions.{id.lower()}.{plateau.Plateau_name}.tsv"
                     #suggested_insertions_path = f"{self.results_directory}Suggested_insertions.{id}.{plateau.Plateau_name}.tsv"
 
                     plateau_specific_output.to_csv(

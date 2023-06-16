@@ -88,9 +88,16 @@ class Coordinates:
 
         self.data = self.data.sort_values(
             "Interest_score", ascending=False
-        ).reset_index(drop=True)
+        )#.reset_index(drop=True)
 
-        for index, gene in self.data.head(config.convolution_limit).iterrows():
+        if config.genes_of_interest is not False:
+            processed_data = self.data[self.data["Gene_name"].isin(
+                config.genes_of_interest
+            )]
+        else:
+            processed_data = self.data.head(config.convolution_limit)
+
+        for index, gene in processed_data.iterrows():
             kernel = self.get_kernel(gene, config)
 
             convolution_y = np.convolve(
@@ -189,10 +196,18 @@ class Coordinates:
 
         self.data = self.data.sort_values("Interest_score", ascending=False)
 
-        for index, gene in self.data.head(config.convolution_limit).iterrows():
+        if config.genes_of_interest is not False:
+            processed_data = self.data[
+                self.data["Gene_name"].isin(
+                config.genes_of_interest
+            )]
+        else:
+            processed_data = self.data.head(config.convolution_limit)
+
+        for index, gene in processed_data.iterrows():
             print(
                 f"""Finding plateaus for gene {gene['Gene_name']} 
-                ({index + 1} of {config.convolution_limit})..."""
+                ({index + 1} of {len(processed_data)})..."""
             )
 
             convolved_x = gene["Enhancer_convolution_x"]
@@ -230,12 +245,19 @@ class Coordinates:
         Coordinates of convolutions are exported to wig file, for each gene
         """
 
-        for index, gene in self.data.head(
-            config.convolution_limit
-        ).iterrows():
+        if config.genes_of_interest is not False:
+            processed_data = self.data[
+                self.data["Gene_name"].isin(
+                config.genes_of_interest
+            )]
+        else:
+            processed_data = self.data.head(config.convolution_limit)
+
+
+        for index, gene in processed_data.iterrows():
             
             id = config.unique_id[:14]
-            convolution_path = f"{config.results_directory}Convolution.{id}.{gene.Gene_name}>.wig"
+            convolution_path = f"{config.results_directory}convolution.{id.lower()}.{gene.Gene_name}.wig"
             
             with open(convolution_path, "w") as convolution_file:
                 convolution_file.write(
