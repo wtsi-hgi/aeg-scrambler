@@ -91,9 +91,8 @@ def design(config=None):
     print('Finding sequences...')
     Sequences(config, coordinates)
 
-
+@app.command()
 def view(
-    genes,
     config,
     gene_annotations,
     regulatory_annotations,
@@ -110,7 +109,6 @@ def view(
     sequences = Sequences(config, coordinates)
 
     tracks = Tracks(
-        genes,
         config,
         gene_annotations,
         regulatory_annotations,
