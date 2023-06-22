@@ -1,0 +1,72 @@
+{
+    "results_directory" : "/lustre/scratch123/hgi/projects/genome_scramble/enhancer_scramble/results4/",
+    "gene_report_directory" : "/lustre/scratch123/hgi/projects/genome_scramble/enhancer_scramble/results4/",
+    "gene_annotation_path" : "/nfs/users/nfs_r/rc30/work/projects/genome_scramble/genome_scramble_data/Homo_sapiens.GRCh38.108.gtf",
+    "regulatory_elements_path" : "/lustre/scratch123/hgi/projects/genome_scramble/HAP1_NGS/ChromHMM_model/HAP1_15_segments.bed",
+    "ccle_expression_path" : "/lustre/scratch123/hgi/projects/genome_scramble/HAP1_NGS/RNAseq/CCLE_expressions_22Q4.csv",
+    "experimental_expression_path" : "/lustre/scratch123/hgi/projects/genome_scramble/HAP1_NGS/RNAseq/Expression_HAP1_c12.tsv",
+    "hic_path" : "",
+    "reference_genome_path" : "/lustre/scratch123/hgi/projects/genome_scramble/HAP1_NGS/genome.fa",
+
+    "genes_of_interest" : false,
+    "cell_line_of_interest" : "HAP1",
+    "chromosomes_of_interest" : ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X", "Y"],
+    "flags_of_interest" : ["E11"],
+    "quiescent_epigenetic_flags_of_interest" : ["E8"],
+
+    "search_type" : "whole_gene",
+    "upstream_search" : 500000,
+    "downstream_search" : 500000,
+
+    "std_max" : false,
+    "std_min" : 1,
+    "anomalous_expression_max" : false,
+    "anomalous_expression_min" : false,
+    "enhancer_count_max" : false,
+    "enhancer_count_min" : 10,
+    "enhancer_proportion_max" : false,
+    "enhancer_proportion_min" : false,
+    "cell_line_expression_max" : false,
+    "cell_line_expression_min" : 3,
+    "gene_size_max" : 50000,
+    "gene_size_min" : false,
+    "symmetry_max" : false,
+    "symmetry_min" : false,
+
+    "std_weight" : 0.9,
+    "anomalous_expression_weight" : 0,
+    "enhancer_count_weight" : 1.1,
+    "enhancer_proportion_weight" : 0.2,
+    "cell_line_expression_weight" : 0.5,
+    "gene_size_weight" : 0.6,
+    "symmetry_weight" : 0,
+
+    "enhancer_kernel_shape" : "guassian",
+    "enhancer_kernel_size_type" : "relative",
+    "absolute_enhancer_kernel_size" : 500,
+    "absolute_enhancer_kernel_sigma" : 3,
+    "relative_enhancer_kernel_size" : 0.15,
+    "relative_enhancer_kernel_sigma" : 0.005,
+
+    "quiescent_kernel_shape" : "guassian",
+    "quiescent_kernel_size_type" : "relative",
+    "absolute_quiescent_kernel_size" : 500,
+    "absolute_quiescent_kernel_sigma" : 3,
+    "relative_quiescent_kernel_size" : 0.15,
+    "relative_quiescent_kernel_sigma" : 0.015,
+
+    "specific_expression_threshold" : 0.01,
+    "interferring_gene_overlaps" : false,
+
+    "convolution_limit" : 3,
+    "enhancer_convolution_weight" : 1,
+    "quiescent_convolution_weight" : 1,
+    "plateau_threshold" : 0.1,
+
+    "inserted_sequence" : "ATAACTTCGTATAATGTACATTATACGAAGTTAT",
+    "partial_insertions_per_region" : 3,
+
+    "pridict_image_path" : "/lustre/scratch125/humgen/teams/hgi/mo11/container/pridict_20_04_2023.img",
+    "pridict_path" : "/home/container_user/PRIDICT/pridict_pegRNA_design.py",
+    "pridict_output_path" : "/lustre/scratch123/hgi/projects/genome_scramble/enhancer_scramble/results4/"
+}
