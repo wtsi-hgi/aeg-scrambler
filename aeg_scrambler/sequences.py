@@ -184,6 +184,7 @@ class Sequences:
                             )
 
                     plateau_specific_output = self.clean_pridict_output(
+                                plateau,
                                 plateau_specific_output
                             )
 
@@ -357,7 +358,7 @@ class Sequences:
 
         return pridict_output
 
-    def clean_pridict_output(self, pridict_output):
+    def clean_pridict_output(self, plateau, pridict_output):
         """Makes the dataframe of PRIDICT output human-readable.
 
         args:
@@ -370,6 +371,7 @@ class Sequences:
         pridict_output.drop(
             ["Original_Sequence", "Edited-Sequences"], axis=1, inplace=True
         )
+        pridict_output["Plateau_name"] = self.name_plateau(plateau)
         pridict_output = pridict_output[
             pridict_output["Editing_Position"] < 10
         ]
